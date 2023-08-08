@@ -16,10 +16,19 @@
 () recv_internal() {
 }
 
+int tlen(tuple t) asm "TLEN";
+
 ;; testable
 tuple fibonacci_sequence(int n, int k) method_id {
     tuple result = empty_tuple();
-    
+
+    if (n < 2) {
+        result~tpush(n);
+    }
+    if (n == 0) {
+        result~tpush(1);
+    }
+
     int a = 0;
     int b = 1;
     repeat (n - 2) {
@@ -27,7 +36,7 @@ tuple fibonacci_sequence(int n, int k) method_id {
         a = b;
         b = c;
     }
-    repeat (k) {
+    repeat (k - result.tlen()) {
         int c = a + b;
         a = b;
         b = c;
