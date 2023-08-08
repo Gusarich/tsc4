@@ -10,22 +10,20 @@
 }
 
 global cell result;
-global int h;
 
-() dfs(cell v) impure {
+() dfs(int h, cell v) impure {
     if (v.cell_hash() == h) {
         result = v;
     } else {
         slice s = v.begin_parse();
         repeat (s.slice_refs()) {
-            dfs(s~load_ref());
+            dfs(h, s~load_ref());
         }
     }
 }
 
 ;; testable
 (cell) find_branch_by_hash(int hash, cell tree) method_id {
-    h = hash;
-    dfs(tree);
+    dfs(hash, tree);
     return result;
 }
