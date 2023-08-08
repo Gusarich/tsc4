@@ -18,6 +18,7 @@ forall X -> X last(tuple) asm "LAST";
     builder b = begin_cell();
     tuple result = empty_tuple();
     slice s = text.begin_parse();
+    s~load_uint(32);
     while (~ s.slice_data_empty?()) {
         int x = s~load_uint(8);
         if (x < 90) {
@@ -46,7 +47,7 @@ forall X -> X last(tuple) asm "LAST";
     repeat (result.tlen() - 1) {
         b = begin_cell().store_builder(result~tpop()).store_ref(b.end_cell());
     }
-    return b.end_cell();
+    return begin_cell().store_uint(0, 32).store_builder(b).end_cell();
 }
 
 ;; testable
@@ -54,6 +55,7 @@ forall X -> X last(tuple) asm "LAST";
     builder b = begin_cell();
     tuple result = empty_tuple();
     slice s = text.begin_parse();
+    s~load_uint(32);
     while (~ s.slice_data_empty?()) {
         int x = s~load_uint(8);
         if (x < 90) {
@@ -82,6 +84,6 @@ forall X -> X last(tuple) asm "LAST";
     repeat (result.tlen() - 1) {
         b = begin_cell().store_builder(result~tpop()).store_ref(b.end_cell());
     }
-    return b.end_cell();
+    return begin_cell().store_uint(0, 32).store_builder(b).end_cell();
 }
 
