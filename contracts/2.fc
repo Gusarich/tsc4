@@ -9,11 +9,40 @@
   After calculating the result matrix, the function should return final result (as tuple).
 -}
 
+forall X -> tuple unsafe_tuple(X) asm "NOP";
+int tlen(tuple) asm "TLEN";
+tuple last(tuple) asm "LAST";
+forall X -> X tat(tuple, int) asm "INDEXVAR";
+
+
 () recv_internal() {
 }
 
 ;; testable
 (tuple) matrix_multiplier(tuple matrixA, tuple matrixB) method_id {
-  return null();
-}
+    tuple result = empty_tuple();
 
+    int n = matrixA.tlen();
+    int m = matrixA.last().tlen();
+    int p = matrixB.last().tlen();
+
+    int i = 0;
+    repeat (n) {
+        int j = 0;
+        tuple tmp = empty_tuple();
+        repeat (p) {
+            int k = 0;
+            int s = 0;
+            repeat (m) {
+                s += (matrixA.tat(i)).tat(k) * (matrixB.tat(k)).tat(j);
+                k += 1;
+            }
+            tmp~tpush(s);
+            j += 1;
+        }
+        result~tpush(tmp);
+        i += 1;
+    }
+
+    return result;
+}
