@@ -9,21 +9,21 @@
 () recv_internal() {
 }
 
-global cell result;
-
-() dfs(int h, cell v) impure {
-    if (v.cell_hash() == h) {
-        result = v;
-    } else {
-        slice s = v.begin_parse();
-        repeat (s.slice_refs()) {
-            dfs(h, s~load_ref());
-        }
-    }
-}
+forall X -> int is_null(X) asm "ISNULL";
 
 ;; testable
 (cell) find_branch_by_hash(int hash, cell tree) method_id {
-    dfs(hash, tree);
-    return result;
+    tuple q = null();
+    q = cons(tree, q);
+    while (~ is_null(q)) {
+        (cell c, q) = uncons(q);
+        if (c.cell_hash() == hash) {
+            return c;
+        }
+        slice s = c.begin_parse();
+        repeat (s.slice_refs()) {
+            q = cons(s~load_ref(), q);
+        }
+    }
+    return null();
 }
