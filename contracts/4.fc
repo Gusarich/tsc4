@@ -13,77 +13,36 @@ int tlen(tuple t) asm "TLEN";
 (tuple, (builder)) tpop(tuple t) asm "TPOP";
 forall X -> X last(tuple) asm "LAST";
 
-;; testable
-(cell) caesar_cipher_encrypt(int shift, cell text) method_id {
-    builder b = begin_cell();
-    tuple result = empty_tuple();
-    slice s = text.begin_parse();
-    s~load_uint(32);
-    while (~ s.slice_data_empty?()) {
+(builder) store_caesar(builder b, slice s, int shift) {
+    repeat (s.slice_bits() / 8) {
         int x = s~load_uint(8);
-        if (x < 90) {
-            x = (x - 65 + shift) % 26 + 65;
-        } else {
-            x = (x - 97 + shift) % 26 + 97;
+        if ((x >= 65) & (x <= 90)) {
+            x = (x - 65 + shift + 26) % 26 + 65;
+        } elseif ((x >= 97) & (x <= 122)) {
+            x = (x - 97 + shift + 26) % 26 + 97;
         }
         b~store_uint(x, 8);
     }
-    result~tpush(b);
-    while (~ s.slice_empty?()) {
-        while (~ s.slice_data_empty?()) {
-            int x = s~load_uint(8);
-            if (x < 90) {
-                x = (x - 65 + shift) % 26 + 65;
-            } else {
-                x = (x - 97 + shift) % 26 + 97;
-            }
-            b~store_uint(x, 8);
-        }
-        s = s~load_ref().begin_parse();
-        result~tpush(b);
-        b = begin_cell();
+    if (s.slice_refs() > 0) {
+        cell c = store_caesar(begin_cell(), s~load_ref().begin_parse(), shift).end_cell();
+        b = b.store_ref(c);
     }
-    b = result~tpop();
-    repeat (result.tlen() - 1) {
-        b = begin_cell().store_builder(result~tpop()).store_ref(b.end_cell());
-    }
+    return b;
+}
+
+;; testable
+(cell) caesar_cipher_encrypt(int shift, cell text) method_id {
+    slice s = text.begin_parse();
+    s~load_uint(32);
+    builder b = store_caesar(begin_cell(), s, shift);
     return begin_cell().store_uint(0, 32).store_builder(b).end_cell();
 }
 
 ;; testable
 (cell) caesar_cipher_decrypt(int shift, cell text) method_id {
-    builder b = begin_cell();
-    tuple result = empty_tuple();
     slice s = text.begin_parse();
     s~load_uint(32);
-    while (~ s.slice_data_empty?()) {
-        int x = s~load_uint(8);
-        if (x < 90) {
-            x = (x - 65 - shift + 26) % 26 + 65;
-        } else {
-            x = (x - 97 - shift + 26) % 26 + 97;
-        }
-        b~store_uint(x, 8);
-    }
-    result~tpush(b);
-    while (~ s.slice_empty?()) {
-        while (~ s.slice_data_empty?()) {
-            int x = s~load_uint(8);
-            if (x < 90) {
-                x = (x - 65 - shift + 26) % 26 + 65;
-            } else {
-                x = (x - 97 - shift + 26) % 26 + 97;
-            }
-            b~store_uint(x, 8);
-        }
-        s = s~load_ref().begin_parse();
-        result~tpush(b);
-        b = begin_cell();
-    }
-    b = result~tpop();
-    repeat (result.tlen() - 1) {
-        b = begin_cell().store_builder(result~tpop()).store_ref(b.end_cell());
-    }
+    builder b = store_caesar(begin_cell(), s, - shift);
     return begin_cell().store_uint(0, 32).store_builder(b).end_cell();
 }
 
