@@ -61,7 +61,7 @@ forall X -> int is_null(X) asm "ISNULL";
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
     slice s = linked_list.begin_parse();
 
-    int f = 341;
+    int f = 336;
 
     slice x = "";
     slice y = s~load_tail(f);
@@ -70,8 +70,9 @@ forall X -> int is_null(X) asm "ISNULL";
     builder tmp = begin_cell();
     int f? = -1;
     while (f?) {
-        ~strdump(begin_cell().store_slice(x).store_slice("|").store_slice(y).store_slice("|").store_slice(z).end_cell().begin_parse());
-        ~strdump(replace(flag, value, x, y, z));
+        ;;~dump([x.slice_bits(), y.slice_bits(), z.slice_bits()]);
+        ;;~strdump(begin_cell().store_slice(x).store_slice(y).store_slice(z).end_cell().begin_parse());
+        ;;~strdump(replace(flag, value, x, y, z));
         
         tmp = tmp.store_slice(replace(flag, value, x, y, z));
         if (tmp.builder_bits() == (f * 3)) {
@@ -93,7 +94,7 @@ forall X -> int is_null(X) asm "ISNULL";
 
     while (~ is_null(result)) {
         slice t = result~list_next();
-        ~strdump(begin_cell().store_slice(t).end_cell().begin_parse());
+        ;;~strdump(begin_cell().store_slice(t).end_cell().begin_parse());
         res = begin_cell().store_slice(t).store_ref(res.end_cell());
     }
 
