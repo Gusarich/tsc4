@@ -16,11 +16,64 @@
 
 -}
 
+int ubitsize(int) asm "UBITSIZE INC";
+
 () recv_internal() {
 }
 
 ;; testable
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
-  return begin_cell().end_cell();
-}
+    int sz = ubitsize(flag);
+    builder result = begin_cell();
+    ~dump(sz);
+    slice s = linked_list.begin_parse();
+    slice next = "";
+    repeat (linked_list.cell_depth()) {
+        linked_list = s~load_ref();
+        next = linked_list.begin_parse();
 
+        ~dump(s);
+
+        while (s.slice_bits() >= sz) {
+            if (s.preload_uint(sz) == flag) {
+                result~store_uint(value, sz);
+                s~skip_bits(sz);
+            }
+            else {
+                result~store_uint(s~load_uint(1), 1);
+            }
+        }
+        s = begin_cell().store_slice(s).store_slice(next~load_bits(sz)).end_cell().begin_parse();
+        while (s.slice_bits() >= sz) {
+            if (s.preload_uint(sz) == flag) {
+                result~store_uint(value, sz);
+                s~skip_bits(sz);
+            }
+            else {
+                result~store_uint(s~load_uint(1), 1);
+            }
+        }
+        result = result.store_slice(s);
+
+        ~dump(s);
+
+        ~strdump("====");
+        s = next;
+    }
+
+    slice s = next;
+    ~dump(s);
+
+    while (s.slice_bits() >= sz) {
+        if (s.preload_uint(sz) == flag) {
+            result~store_uint(value, sz);
+            s~skip_bits(sz);
+        }
+        else {
+            result~store_uint(s~load_uint(1), 1);
+        }
+    }
+    result = result.store_slice(s);
+
+    return result.end_cell();
+}
