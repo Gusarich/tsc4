@@ -25,5 +25,5 @@ forall X -> int is_null(X) asm "ISNULL";
             q = cons(s~load_ref(), q);
         }
     }
-    return null();
+    return begin_cell().end_cell();
 }
