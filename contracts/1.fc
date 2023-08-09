@@ -9,21 +9,50 @@
 () recv_internal() {
 }
 
-forall X -> int is_null(X) asm "ISNULL";
+(cell) solve(int h, cell t) asm """
+    // h t
+    c2 SAVE
+    SAMEALTSAVE
+    WHILE:<{
+        // [t...] h [t]
+        DEPTH // [t...] h [t] 1/2+
+        1 GTINT // [t...] h [t] ?
+    }>DO<{
+        // [t...] h t
+        DUP // [t...] h t t
+        HASHCU // [t...] h t ht
+        s2 PUSH // [t...] h t ht h
+        EQUAL // [t...] h t ?
+        IFJMP:<{
+            // [t...] h t
+            1 PUSHINT // [t...] h t 2
+            ONLYTOPX // h t
+            RETALT
+        }>
+        // [t...] h t
+        CTOS // [t...] h ts
+        DUP // [t...] h ts ts
+        SREFS // [t...] h ts r
+        REPEAT:<{
+            // [t...] h ts
+            LDREF // [t...] h r ts
+            s1 s2 XCHG // [t...] r1...rn h ts
+        }>
+        // [t...] r1...rn h ts
+        DROP // [t...] r1...rn h
+        DEPTH // [t...] r1...rn h n+1
+        1 EQINT // [t...] r1...rn h ?
+        IF:<{
+            // h
+            DROP // 
+            <b b> PUSHREF // c
+            RETALT
+        }>
+        SWAP // [t...] r1...rn-1 h rn
+    }>
+""";
 
 ;; testable
 (cell) find_branch_by_hash(int hash, cell tree) method_id {
-    tuple q = null();
-    q = cons(tree, q);
-    while (~ is_null(q)) {
-        (cell c, q) = uncons(q);
-        if (c.cell_hash() == hash) {
-            return c;
-        }
-        slice s = c.begin_parse();
-        repeat (s.slice_refs()) {
-            q = cons(s~load_ref(), q);
-        }
-    }
-    return begin_cell().end_cell();
+    return solve(hash, tree);
 }
