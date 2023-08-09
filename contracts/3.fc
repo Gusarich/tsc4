@@ -17,65 +17,136 @@
 -}
 
 int ubitsize(int) asm "UBITSIZE INC";
+forall X -> X tpop(tuple) asm "TPOP";
+forall X -> tuple unsafe_tuple(X) asm "NOP";
+int tlen(tuple) asm "TLEN";
+forall X -> X last(tuple) asm "LAST";
+forall X -> int is_null(X) asm "ISNULL";
 
-() recv_internal() {
-}
-
-;; testable
-(cell) find_and_replace(int flag, int value, cell linked_list) method_id {
+(slice) replace(int flag, int value, slice prev, slice this, slice next) {
     int sz = ubitsize(flag);
+
+    int prev_bits = min(sz - 1, prev.slice_bits());
+    int next_bits = min(sz - 1, next.slice_bits());
+
     builder result = begin_cell();
-    ~dump(sz);
-    slice s = linked_list.begin_parse();
-    slice next = "";
-    repeat (linked_list.cell_depth()) {
-        linked_list = s~load_ref();
-        next = linked_list.begin_parse();
-
-        ~dump(s);
-
-        while (s.slice_bits() >= sz) {
-            if (s.preload_uint(sz) == flag) {
-                result~store_uint(value, sz);
-                s~skip_bits(sz);
-            }
-            else {
-                result~store_uint(s~load_uint(1), 1);
-            }
-        }
-        if (next.slice_bits() >= sz) {
-            s = begin_cell().store_slice(s).store_slice(next~load_bits(sz)).end_cell().begin_parse();
-            while (s.slice_bits() >= sz) {
-                if (s.preload_uint(sz) == flag) {
-                    result~store_uint(value, sz);
-                    s~skip_bits(sz);
-                }
-                else {
-                    result~store_uint(s~load_uint(1), 1);
-                }
-            }
-        }
-        result = result.store_slice(s);
-
-        ~dump(s);
-
-        ~strdump("====");
-        s = next;
-    }
-
-    slice s = next;
-    ~dump(s);
-
+    slice s = begin_cell().store_slice(prev.slice_last(prev_bits)).store_slice(this).store_slice(next.preload_bits(next_bits)).end_cell().begin_parse();
     while (s.slice_bits() >= sz) {
         if (s.preload_uint(sz) == flag) {
             result~store_uint(value, sz);
             s~skip_bits(sz);
-        }
-        else {
+        } else {
             result~store_uint(s~load_uint(1), 1);
         }
     }
-    result = result.store_slice(s);
+    s = result.store_slice(s).end_cell().begin_parse();
+    return s.skip_bits(prev_bits).skip_last_bits(next_bits);
+}
 
-    return result.end_cell();
+(slice, (slice)) load_tail(slice s, int len) {
+    int x = s.slice_bits();
+    if ((x >= len) | s.slice_refs_empty?()) {
+        return s.load_bits(min(len, x));
+    } else {
+        slice s' = s~load_ref().begin_parse();
+        slice r = begin_cell()
+            .store_slice(s.preload_bits(x))
+            .store_slice(s'~load_tail(len - x))
+        .end_cell().begin_parse();
+        return (s', (r));
+    }
+}
+
+;; testable
+(cell) find_and_replace(int flag, int value, cell linked_list) method_id {
+    slice s = linked_list.begin_parse();
+
+    int f = 341;
+
+    slice x = "";
+    slice y = s~load_tail(f);
+    slice z = s~load_tail(f);
+    tuple result = null();
+    builder tmp = begin_cell();
+    int f? = -1;
+    while (f?) {
+        ~strdump(begin_cell().store_slice(x).store_slice("|").store_slice(y).store_slice("|").store_slice(z).end_cell().begin_parse());
+        ~strdump(replace(flag, value, x, y, z));
+        
+        tmp = tmp.store_slice(replace(flag, value, x, y, z));
+        if (tmp.builder_bits() == (f * 3)) {
+            result = cons(tmp.end_cell().begin_parse(), result);
+            tmp = begin_cell();
+        }
+
+        (x, y, z) = (y, z, s~load_tail(f));
+
+        if (y.slice_empty?()) {
+            f? = 0;
+        }
+    }
+    if (tmp.builder_bits() > 0) {
+        result = cons(tmp.end_cell().begin_parse(), result);
+    }
+
+    builder res = begin_cell();
+
+    while (~ is_null(result)) {
+        slice t = result~list_next();
+        ~strdump(begin_cell().store_slice(t).end_cell().begin_parse());
+        res = begin_cell().store_slice(t).store_ref(res.end_cell());
+    }
+
+    return res.end_cell();
+}
+
+() recv_internal() {
+    ;; slice s = begin_cell()
+    ;;     .store_slice("abcde")
+    ;;     .store_ref(begin_cell()
+    ;;         .store_slice("fghijk")
+    ;;         .store_ref(begin_cell()
+    ;;             .store_slice("defgdefde")
+    ;;         .end_cell())
+    ;;     .end_cell())
+    ;; .end_cell().begin_parse();
+
+    ;; int f = 24;
+
+    ;; slice x = "";
+    ;; slice y = s~load_tail(f);
+    ;; slice z = s~load_tail(f);
+    ;; tuple result = null();
+    ;; builder tmp = begin_cell();
+    ;; int flag = -1;
+    ;; while (flag) {
+    ;;     ;; ~strdump(begin_cell().store_slice(x).store_slice("|").store_slice(y).store_slice("|").store_slice(z).end_cell().begin_parse());
+
+    ;;     ;; ~strdump(replace(0x64656667, 0x68656c6c, x, y, z));
+        
+    ;;     tmp = tmp.store_slice(replace(0x64656667, 0x68656c6c, x, y, z));
+    ;;     if (tmp.builder_bits() == (f * 3)) {
+    ;;         result = cons(tmp.end_cell().begin_parse(), result);
+    ;;         tmp = begin_cell();
+    ;;     }
+
+    ;;     (x, y, z) = (y, z, s~load_tail(f));
+
+    ;;     if (y.slice_empty?()) {
+    ;;         flag = 0;
+    ;;     }
+    ;; }
+    ;; if (tmp.builder_bits() > 0) {
+    ;;     result = cons(tmp.end_cell().begin_parse(), result);
+    ;; }
+
+    ;; builder res = begin_cell();
+
+    ;; while (~ is_null(result)) {
+    ;;     slice t = result~list_next();
+    ;;     ~strdump(begin_cell().store_slice(t).end_cell().begin_parse());
+    ;;     res = begin_cell().store_slice(t).store_ref(res.end_cell());
+    ;; }
+
+    ;; ~dump(res.end_cell());
 }
