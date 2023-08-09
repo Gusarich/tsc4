@@ -31,6 +31,8 @@ jobs:
           response=$(curl -s -w "%{http_code}" --max-time 600 -X POST -H "Content-Type: multipart/form-data" -F "file=@code.zip" -F "token=${{secrets.USER_TOKEN}}" -F "github=Gusarich" $ENDPOINT_URL)
           status_code=${response: -3}
 
+          echo ${response}
+
           # Extracting the JSON response body (excluding the status code)
           json_response==${response:0:-3}
 
