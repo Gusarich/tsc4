@@ -12,13 +12,6 @@
 global cell result;
 
 () dfs(int h, cell v) impure {
-    
-    
-    
-    ;; let's just try to add this line so it will work
-
-
-
     if (v.cell_hash() == h) {
         result = v;
     } else {
