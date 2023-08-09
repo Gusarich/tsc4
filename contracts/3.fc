@@ -43,14 +43,16 @@ int ubitsize(int) asm "UBITSIZE INC";
                 result~store_uint(s~load_uint(1), 1);
             }
         }
-        s = begin_cell().store_slice(s).store_slice(next~load_bits(sz)).end_cell().begin_parse();
-        while (s.slice_bits() >= sz) {
-            if (s.preload_uint(sz) == flag) {
-                result~store_uint(value, sz);
-                s~skip_bits(sz);
-            }
-            else {
-                result~store_uint(s~load_uint(1), 1);
+        if (next.slice_bits() >= sz) {
+            s = begin_cell().store_slice(s).store_slice(next~load_bits(sz)).end_cell().begin_parse();
+            while (s.slice_bits() >= sz) {
+                if (s.preload_uint(sz) == flag) {
+                    result~store_uint(value, sz);
+                    s~skip_bits(sz);
+                }
+                else {
+                    result~store_uint(s~load_uint(1), 1);
+                }
             }
         }
         result = result.store_slice(s);
