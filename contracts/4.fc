@@ -9,122 +9,22 @@
 () recv_internal() {
 }
 
-(builder) store_caesar(slice s, int d) asm """
-    // s d
-    DUP // s d d
-    13 ADDCONST // s d d+13
-    1 SETGLOB // s d
-    7 ADDCONST // s d+7
-    2 SETGLOB // s
-    NEWC // s b
-    SWAP // b s
-
-
-    // b s
-    DUP // b s s
-    SBITS // b s sl
-    3 RSHIFT# // b s sl/8
-    REPEAT:<{
-        // b s
-        8 LDU // b x s
-        SWAP // b s x
-        DUP // b s x x
-        65 GEQINT // b s x ?
-        OVER // b s x ? x
-        90 LEQINT // b s x ? ?
-        AND // b s x ?
-        IF:<{
-            // 65-90
-            // b s x
-            1 GETGLOB
-            ADD
-            26 PUSHINT
-            MOD
-            65 ADDCONST
-        }>ELSE<{
-            DUP // b s x x
-            97 GEQINT // b s x ?
-            OVER // b s x ? x
-            122 LEQINT // b s x ? ?
-            AND // b s x ?
-            IF:<{
-                // 97-122
-                // b s x
-                2 GETGLOB
-                ADD
-                26 PUSHINT
-                MOD
-                97 ADDCONST
-            }>
-        }>
-        // b s x
-        ROT // s x b
-        8 STU // s b
-        SWAP // b s
-    }>
-    // b s
-
-
-    DUP // b s s
-    SDEPTH // b s sd
-    REPEAT:<{
-        // b s
-        LDREFRTOS // b s s'
-        NIP // b s'
-        NEWC // b s' b1
-        SWAP // b b1 s'
-        DUP // b s s
-        SBITS // b s sl
-        3 RSHIFT# // b s sl/8
-        REPEAT:<{
-            // b s
-            8 LDU // b x s
-            SWAP // b s x
-            DUP // b s x x
-            65 GEQINT // b s x ?
-            OVER // b s x ? x
-            90 LEQINT // b s x ? ?
-            AND // b s x ?
-            IF:<{
-                // 65-90
-                // b s x
-                1 GETGLOB
-                ADD
-                26 PUSHINT
-                MOD
-                65 ADDCONST
-            }>ELSE<{
-                DUP // b s x x
-                97 GEQINT // b s x ?
-                OVER // b s x ? x
-                122 LEQINT // b s x ? ?
-                AND // b s x ?
-                IF:<{
-                    // 97-122
-                    // b s x
-                    2 GETGLOB
-                    ADD
-                    26 PUSHINT
-                    MOD
-                    97 ADDCONST
-                }>
-            }>
-            // b s x
-            ROT // s x b
-            8 STU // s b
-            SWAP // b s
-        }>
-    }>
-
-    DROP // ... b1 b2 b3
-    DEPTH // ... b1 b2 b3 n
-    -2 ADDCONST // ... b1 b2 b3 n-2
-    REPEAT:<{
-        ENDC // ... b1 b2 c3
-        SWAP // ... b1 c3 b2
-        STREF // ... b1 b2
-    }>
-""";
+(builder) store_caesar(slice s, int d) {
+    builder b = begin_cell();
+    repeat (s.slice_bits() / 8) {
+        int x = s~load_uint(8);
+        if ((x >= 65) & (x <= 90)) {
+            x = (x + d + 13) % 26 + 65;
+        } elseif ((x >= 97) & (x <= 122)) {
+            x = (x + d + 7) % 26 + 97;
+        }
+        b~store_uint(x, 8);
+    }
+    if (s.slice_refs_empty?()) {
+        return b;
+    }
+    return b.store_ref(store_caesar(s.preload_ref().begin_parse(), d).end_cell());
+}
 
 ;; testable
 (cell) caesar_cipher_encrypt(int shift, cell text) method_id {
