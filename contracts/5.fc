@@ -50,18 +50,17 @@ tuple solve(int n, int k) asm """
     DICTUGET // k-1 v ?
     DROP // k-1 v
     256 LDU // k-1 a v
-    ROT // a v k-1
-    DUP // a v k-1 k-1
+    256 LDU // k-1 a b v
+    3 ROLL // a b v k-1
+    DUP // a b v k-1 k-1
     IFNOTJMP:<{
-        // a v k-1
-        DROP2 // a
+        // a b v k-1
+        3 BLKDROP // a
         SINGLE // t
     }>
-    DEC // a v k-2
-    -ROT // k-2 a v
-    256 LDU // k-2 a b v
-    DROP // k-2 a b
-    ROT // a b k-2
+    // a b v k-1
+    DEC // a b v k-2
+    NIP // a b k-2
     REPEAT:<{
         // [...] a b
         DUP2 // [...] a b a b
