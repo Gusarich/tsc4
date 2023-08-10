@@ -16,7 +16,7 @@
 
 -}
 
-int ubitsize(int) asm "UBITSIZE INC";
+int ubitsize(int) asm "UBITSIZE";
 forall X -> X tpop(tuple) asm "TPOP";
 forall X -> tuple unsafe_tuple(X) asm "NOP";
 int tlen(tuple) asm "TLEN";
@@ -66,6 +66,7 @@ forall X -> int is_null(X) asm "ISNULL";
         if (v.slice_bits() < sz) {
             f? = false;
         } else {
+            ~dump(v.preload_uint(sz));
             if (v.preload_uint(sz) == flag) {
                 if (cur.builder_bits() + szv > 1023) {
                     result = cons(cur, result);
@@ -100,7 +101,9 @@ forall X -> int is_null(X) asm "ISNULL";
         res = begin_cell().store_builder(t).store_ref(res.end_cell());
     }
 
-    return res.end_cell();
+    cell res = res.end_cell();
+
+    return res;
 }
 
 () recv_internal() {
