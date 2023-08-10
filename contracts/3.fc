@@ -25,6 +25,7 @@ forall X -> int is_null(X) asm "ISNULL";
 
 (slice) replace(int flag, int value, slice prev, slice this, slice next) {
     int sz = ubitsize(flag);
+    int szv = ubitsize(value);
 
     int prev_bits = min(sz - 1, prev.slice_bits());
     int next_bits = min(sz - 1, next.slice_bits());
@@ -33,7 +34,7 @@ forall X -> int is_null(X) asm "ISNULL";
     slice s = begin_cell().store_slice(prev.slice_last(prev_bits)).store_slice(this).store_slice(next.preload_bits(next_bits)).end_cell().begin_parse();
     while (s.slice_bits() >= sz) {
         if (s.preload_uint(sz) == flag) {
-            result~store_uint(value, sz);
+            result~store_uint(value, szv);
             s~skip_bits(sz);
         } else {
             result~store_uint(s~load_uint(1), 1);
@@ -61,7 +62,7 @@ forall X -> int is_null(X) asm "ISNULL";
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
     slice s = linked_list.begin_parse();
 
-    int f = 336;
+    int f = 288;
 
     slice x = "";
     slice y = s~load_tail(f);
