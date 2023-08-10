@@ -28,57 +28,40 @@
             8 LDU // b x s
             SWAP // b s x
             DUP // b s x x
-            65 LESSINT // b s x ?
+            65 GEQINT // b s x ?
             OVER // b s x ? x
-            122 GTINT // b s x ? ?
-            OR // b s x ?
+            90 LEQINT // b s x ? ?
+            AND // b s x ?
             IF:<{
-                // <65 or >122
+                // 65-90
                 // b s x
-                ROT // s x b
-                8 STU // s b
-                SWAP // b s
+                13 ADDCONST
+                1 GETGLOB
+                ADD
+                26 PUSHINT
+                MOD
+                65 ADDCONST
             }>ELSE<{
-                // b s x
                 DUP // b s x x
-                90 LEQINT // b s x ?
+                97 GEQINT // b s x ?
+                OVER // b s x ? x
+                122 LEQINT // b s x ? ?
+                AND // b s x ?
                 IF:<{
-                    // 65-90
+                    // 97-122
                     // b s x
-                    1 GETGLOB // b s x d
-                    ADD // b s x
-                    13 ADDCONST // b s x
-                    26 PUSHINT // b s x 26
-                    MOD // b s x
-                    65 ADDCONST // b s x
-                    ROT // s x b
-                    8 STU // s b
-                    SWAP // b s
-                }>ELSE<{
-                    // b s x
-                    DUP // b s x x
-                    97 GEQINT // b s x ?
-                    IF:<{
-                        // 97-122
-                        // b s x
-                        1 GETGLOB // b s x d
-                        ADD // b s x
-                        7 ADDCONST // b s x
-                        26 PUSHINT // b s x 26
-                        MOD // b s x
-                        97 ADDCONST // b s x
-                        ROT // s x b
-                        8 STU // s b
-                        SWAP // b s
-                    }>ELSE<{
-                        // 91-96
-                        // b s x
-                        ROT // s x b
-                        8 STU // s b
-                        SWAP // b s
-                    }>
+                    7 ADDCONST
+                    1 GETGLOB
+                    ADD
+                    26 PUSHINT
+                    MOD
+                    97 ADDCONST
                 }>
             }>
+            // b s x
+            ROT // s x b
+            8 STU // s b
+            SWAP // b s
         }>
         SWAP // s b
         SWAP // b s
