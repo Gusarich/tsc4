@@ -18,10 +18,7 @@
     2 SETGLOB // s
     NEWC // s b
     SWAP // b s
-    DUP // b s s
-    SDEPTH // b s sd
-    INC // b s sd+1
-    REPEAT:<{
+    AGAINBRK:<{
         // b s
         DUP // b s s
         SBITS // b s sl
@@ -64,17 +61,17 @@
             8 STU // s b
             SWAP // b s
         }>
+        // b s
         DUP // b s s
         SREFS // b s sr
         ISPOS // b s ?
-        IF:<{
-            // b s
-            LDREFRTOS // b s s'
-            NIP // b s'
-            NEWC // b s' b1
-            SWAP // b b1 s'
-        }>
+        IFNOTRETALT // b s
+        LDREFRTOS // b s s'
+        NIP // b s'
+        NEWC // b s' b1
+        SWAP // b b1 s'
     }>
+
     DROP // ... b1 b2 b3
     DEPTH // ... b1 b2 b3 n
     -2 ADDCONST
@@ -100,4 +97,3 @@
         .store_builder(store_caesar(text.begin_parse().skip_bits(32), - shift))
     .end_cell();
 }
-
