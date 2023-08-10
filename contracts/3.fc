@@ -62,7 +62,7 @@ forall X -> int is_null(X) asm "ISNULL";
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
     slice s = linked_list.begin_parse();
 
-    int f = 288;
+    int f = 128;
 
     slice x = "";
     slice y = s~load_tail(f);
