@@ -11,7 +11,11 @@
 
 (builder) store_caesar(slice s, int d) asm """
     // s d
-    1 SETGLOB // s
+    DUP // s d d
+    13 ADDCONST // s d d+13
+    1 SETGLOB // s d
+    7 ADDCONST // s d+7
+    2 SETGLOB // s
     NEWC // s b
     SWAP // b s
     DUP // b s s
@@ -35,7 +39,6 @@
             IF:<{
                 // 65-90
                 // b s x
-                13 ADDCONST
                 1 GETGLOB
                 ADD
                 26 PUSHINT
@@ -50,8 +53,7 @@
                 IF:<{
                     // 97-122
                     // b s x
-                    7 ADDCONST
-                    1 GETGLOB
+                    2 GETGLOB
                     ADD
                     26 PUSHINT
                     MOD
