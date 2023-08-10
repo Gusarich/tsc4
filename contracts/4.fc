@@ -13,8 +13,9 @@ int tlen(tuple) asm "TLEN";
 }
 
 (builder) store_caesar(slice s, int d) {
-    tuple t = empty_tuple();
-    repeat (s.slice_depth()) {
+    tuple t = null();
+    int slicedepth = s.slice_depth();
+    repeat (slicedepth) {
         builder b = begin_cell();
         repeat (s.slice_bits() / 8) {
             int x = s~load_uint(8);
@@ -25,7 +26,7 @@ int tlen(tuple) asm "TLEN";
             }
             b~store_uint(x, 8);
         }
-        t~tpush(b);
+        t = cons(b, t);
         s = s.preload_ref().begin_parse();
     }
     builder b = begin_cell();
@@ -38,10 +39,10 @@ int tlen(tuple) asm "TLEN";
         }
         b~store_uint(x, 8);
     }
-    t~tpush(b);
-    builder b = t~tpop();
-    repeat (t.tlen()) {
-        b = (t~tpop()).store_ref(b.end_cell());
+    t = cons(b, t);
+    builder b = t~list_next();
+    repeat (slicedepth) {
+        b = (t~list_next()).store_ref(b.end_cell());
     }
     return b;
 }
