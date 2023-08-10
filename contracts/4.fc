@@ -25,8 +25,7 @@
         // b s
         DUP // b s s
         SBITS // b s sl
-        3 PUSHINT // b s sl 3
-        RSHIFT // b s sl/8
+        3 RSHIFT# // b s sl/8
         REPEAT:<{
             // b s
             8 LDU // b x s
@@ -65,8 +64,6 @@
             8 STU // s b
             SWAP // b s
         }>
-        SWAP // s b
-        SWAP // b s
         DUP // b s s
         SREFS // b s sr
         ISPOS // b s ?
