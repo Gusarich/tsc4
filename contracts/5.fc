@@ -17,67 +17,59 @@
 }
 
 tuple solve(int n, int k) asm """
+    // n k
     DUP // n k k
-    ISZERO // n k ?
-    IF:<{
+    IFNOTJMP:<{
         // n k
         DROP2 //
         NIL // t
-    }>ELSE<{
-        // n k
-        
-        0 1 { 2dup + } 368 times
-        dictnew 368
-        {
-            // ... a b D i
-            2swap // ... D i a b
-            over // ... D i a b a
-            <b swap 256 u, swap 256 u, b> <s // ... D i a v
-            2swap // ... a v D i
-            dup // ... a v D i i
-            4 -roll // ... i a v D i
-            swap // ... i a v i D
-            9 // ... i a v i D 9
-            udict! // ... i a D ?
-            drop // ... i a D
-            rot // ... a D i
-            1 - // ... a D i-1
-        } 369 times
-        drop swap drop // D
-
-        PUSHREF // n k D
-        SWAP // n D k
-        DUP // n D k k
-        1 EQINT // n D k ?
-        IF:<{
-            // n D k
-            DROP // n D
-            9 PUSHINT // n D 9
-            DICTUGET // v ?
-            DROP // v
-            256 LDU // a v
-            DROP // a
-            SINGLE // t
-        }>ELSE<{
-            // n D k
-            -2 ADDCONST // n D k-2
-            -ROT // k-2 n D
-            9 PUSHINT // k-2 n D 9
-            DICTUGET // k-2 v ?
-            DROP // k-2 v
-            256 LDU // k-2 a v
-            256 LDU // k-2 a b v
-            DROP // k-2 a b
-            ROT // a b k-2
-            REPEAT:<{
-                // [...] a b
-                DUP2 // [...] a b a b
-                ADD // [...] a b c
-            }>
-            DEPTH // [...] k
-            TUPLEVAR // t
-        }>
     }>
+    // n k
+    0 1 { 2dup + } 368 times
+    dictnew 368
+    {
+        // ... a b D i
+        2swap // ... D i a b
+        over // ... D i a b a
+        <b swap 256 u, swap 256 u, b> <s // ... D i a v
+        2swap // ... a v D i
+        dup // ... a v D i i
+        4 -roll // ... i a v D i
+        swap // ... i a v i D
+        9 // ... i a v i D 9
+        udict! // ... i a D ?
+        drop // ... i a D
+        rot // ... a D i
+        1 - // ... a D i-1
+    } 369 times
+    drop swap drop
+    PUSHREF // n k D
+    SWAP // n D k
+    -2 ADDCONST // n D k-2
+    -ROT // k-2 n D
+    9 PUSHINT // k-2 n D 9
+    DICTUGET // k-2 v ?
+    DROP // k-2 v
+    256 LDU // k-2 a v
+    ROT // a v k-2
+    DUP // a v k-2 k-2
+    -1 EQINT // a v k-2 ?
+    IFJMP:<{
+        // a v k-2
+        DROP2 // a
+        SINGLE // t
+    }>
+    -ROT // k-2 a v
+    256 LDU // k-2 a b v
+    DROP // k-2 a b
+    ROT // a b k-2
+    REPEAT:<{
+        // [...] a b
+        DUP2 // [...] a b a b
+        ADD // [...] a b c
+    }>
+    DEPTH // [...] k
+    TUPLEVAR // t
 """;
 
 ;; testable
