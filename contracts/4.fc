@@ -18,8 +18,61 @@
     2 SETGLOB // s
     NEWC // s b
     SWAP // b s
-    AGAINBRK:<{
+
+
+    // b s
+    DUP // b s s
+    SBITS // b s sl
+    3 RSHIFT# // b s sl/8
+    REPEAT:<{
         // b s
+        8 LDU // b x s
+        SWAP // b s x
+        DUP // b s x x
+        65 GEQINT // b s x ?
+        OVER // b s x ? x
+        90 LEQINT // b s x ? ?
+        AND // b s x ?
+        IF:<{
+            // 65-90
+            // b s x
+            1 GETGLOB
+            ADD
+            26 PUSHINT
+            MOD
+            65 ADDCONST
+        }>ELSE<{
+            DUP // b s x x
+            97 GEQINT // b s x ?
+            OVER // b s x ? x
+            122 LEQINT // b s x ? ?
+            AND // b s x ?
+            IF:<{
+                // 97-122
+                // b s x
+                2 GETGLOB
+                ADD
+                26 PUSHINT
+                MOD
+                97 ADDCONST
+            }>
+        }>
+        // b s x
+        ROT // s x b
+        8 STU // s b
+        SWAP // b s
+    }>
+    // b s
+
+
+    DUP // b s s
+    SDEPTH // b s sd
+    REPEAT:<{
+        // b s
+        LDREFRTOS // b s s'
+        NIP // b s'
+        NEWC // b s' b1
+        SWAP // b b1 s'
         DUP // b s s
         SBITS // b s sl
         3 RSHIFT# // b s sl/8
@@ -61,20 +114,11 @@
             8 STU // s b
             SWAP // b s
         }>
-        // b s
-        DUP // b s s
-        SREFS // b s sr
-        ISPOS // b s ?
-        IFNOTRETALT // b s
-        LDREFRTOS // b s s'
-        NIP // b s'
-        NEWC // b s' b1
-        SWAP // b b1 s'
     }>
 
     DROP // ... b1 b2 b3
     DEPTH // ... b1 b2 b3 n
-    -2 ADDCONST
+    -2 ADDCONST // ... b1 b2 b3 n-2
     REPEAT:<{
         ENDC // ... b1 b2 c3
         SWAP // ... b1 c3 b2
