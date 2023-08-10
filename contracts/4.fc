@@ -1,48 +1,121 @@
 {-
   TASK 4 - Caesar Cipher
-  Implement a Caesar cipher encryption and decryption functions.
+  Implement a Caesar cipher encryption andecryption functions.
   The input is a string (https://docs.ton.org/develop/smart-contracts/guidelines/internal-messages#simple-message-with-comment)
-  where the text is encrypted in a cell (after 32bit 00000000 prefix flag), the algorithm rotates the characters and the last ASCII
-  character should go to the beginning. Return new text encoded in cell.
+  where the text is encryptein a cell (after 32bit 00000000 prefix flag), the algorithm rotates the characters anthe last ASCII
+  character shoulgo to the beginning. Return new text encodein cell.
 -}
 
 () recv_internal() {
 }
 
-int tlen(tuple t) asm "TLEN";
-(tuple, (builder)) tpop(tuple t) asm "TPOP";
-forall X -> X last(tuple) asm "LAST";
-
-(builder) store_caesar(builder b, slice s, int shift) {
-    repeat (s.slice_bits() / 8) {
-        int x = s~load_uint(8);
-        if ((x >= 65) & (x <= 90)) {
-            x = (x + shift + 13) % 26 + 65;
-        } elseif ((x >= 97) & (x <= 122)) {
-            x = (x + shift + 7) % 26 + 97;
-        }
-        b~store_uint(x, 8);
-    }
-    if (s.slice_refs() > 0) {
-        cell c = store_caesar(begin_cell(), s~load_ref().begin_parse(), shift).end_cell();
-        b = b.store_ref(c);
-    }
-    return b;
-}
+(builder) store_caesar(slice s, int d) asm """
+    // s d
+    1 SETGLOB // s
+    NEWC // s b
+    SWAP // b s
+    DUP // b s s
+    SDEPTH // b s sd
+    INC // b s sd+1
+    REPEAT:<{
+        // b s
+        DUP // b s s
+        SBITS // b s sl
+        3 PUSHINT // b s sl 3
+        RSHIFT // b s sl/8
+        REPEAT:<{
+            // b s
+            8 LDU // b x s
+            SWAP // b s x
+            DUP // b s x x
+            65 LESSINT // b s x ?
+            OVER // b s x ? x
+            122 GTINT // b s x ? ?
+            OR // b s x ?
+            IF:<{
+                // <65 or >122
+                // b s x
+                ROT // s x b
+                8 STU // s b
+                SWAP // b s
+            }>ELSE<{
+                // b s x
+                DUP // b s x x
+                90 LEQINT // b s x ?
+                IF:<{
+                    // 65-90
+                    // b s x
+                    1 GETGLOB // b s x d
+                    ADD // b s x
+                    13 ADDCONST // b s x
+                    26 PUSHINT // b s x 26
+                    MOD // b s x
+                    65 ADDCONST // b s x
+                    ROT // s x b
+                    8 STU // s b
+                    SWAP // b s
+                }>ELSE<{
+                    // b s x
+                    DUP // b s x x
+                    97 GEQINT // b s x ?
+                    IF:<{
+                        // 97-122
+                        // b s x
+                        1 GETGLOB // b s x d
+                        ADD // b s x
+                        7 ADDCONST // b s x
+                        26 PUSHINT // b s x 26
+                        MOD // b s x
+                        97 ADDCONST // b s x
+                        ROT // s x b
+                        8 STU // s b
+                        SWAP // b s
+                    }>ELSE<{
+                        // 91-96
+                        // b s x
+                        ROT // s x b
+                        8 STU // s b
+                        SWAP // b s
+                    }>
+                }>
+            }>
+        }>
+        SWAP // s b
+        SWAP // b s
+        DUP // b s s
+        SREFS // b s sr
+        ISPOS // b s ?
+        IF:<{
+            // b s
+            LDREFRTOS // b s s'
+            NIP // b s'
+            NEWC // b s' b1
+            SWAP // b b1 s'
+        }>
+    }>
+    DROP // ... b1 b2 b3
+    DEPTH // ... b1 b2 b3 n
+    -2 ADDCONST
+    REPEAT:<{
+        ENDC // ... b1 b2 c3
+        SWAP // ... b1 c3 b2
+        STREF // ... b1 b2
+    }>
+""";
 
 ;; testable
 (cell) caesar_cipher_encrypt(int shift, cell text) method_id {
-    slice s = text.begin_parse();
-    s~load_uint(32);
-    builder b = store_caesar(begin_cell(), s, shift);
-    return begin_cell().store_uint(0, 32).store_builder(b).end_cell();
+    return begin_cell()
+        .store_uint(0, 32)
+        .store_builder(store_caesar(text.begin_parse().skip_bits(32), shift))
+    .end_cell();
 }
 
 ;; testable
 (cell) caesar_cipher_decrypt(int shift, cell text) method_id {
-    slice s = text.begin_parse();
-    s~load_uint(32);
-    builder b = store_caesar(begin_cell(), s, - shift);
-    return begin_cell().store_uint(0, 32).store_builder(b).end_cell();
+    return begin_cell()
+        .store_uint(0, 32)
+        .store_builder(store_caesar(text.begin_parse().skip_bits(32), - shift))
+    .end_cell();
 }
 
