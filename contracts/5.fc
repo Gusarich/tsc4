@@ -25,6 +25,7 @@ tuple solve(int n, int k) asm """
         NIL // t
     }>
     // n k
+    DEC // n k-1
     0 1 { 2dup + } 368 times
     dictnew 368
     {
@@ -43,22 +44,20 @@ tuple solve(int n, int k) asm """
         1 - // ... a D i-1
     } 369 times
     drop swap drop
-    PUSHREF // n k D
-    SWAP // n D k
-    -2 ADDCONST // n D k-2
-    -ROT // k-2 n D
-    9 PUSHINT // k-2 n D 9
-    DICTUGET // k-2 v ?
-    DROP // k-2 v
-    256 LDU // k-2 a v
-    ROT // a v k-2
-    DUP // a v k-2 k-2
-    -1 EQINT // a v k-2 ?
-    IFJMP:<{
-        // a v k-2
+    PUSHREF // n k-1 D
+    s1 s2 XCHG // k-1 n D
+    9 PUSHINT // k-1 n D 9
+    DICTUGET // k-1 v ?
+    DROP // k-1 v
+    256 LDU // k-1 a v
+    ROT // a v k-1
+    DUP // a v k-1 k-1
+    IFNOTJMP:<{
+        // a v k-1
         DROP2 // a
         SINGLE // t
     }>
+    DEC // a v k-2
     -ROT // k-2 a v
     256 LDU // k-2 a b v
     DROP // k-2 a b
