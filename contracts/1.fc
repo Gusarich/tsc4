@@ -9,42 +9,29 @@
 () recv_internal() {
 }
 
-(cell) solve(int h, cell t) asm """
-    SWAP // t h
-    1 SETGLOB // t
-    c2 SAVE
-    SAMEALTSAVE
-    WHILE:<{
-        // [t...]
-        DEPTH // [t...] d
-        ISPOS // [t...] ?
-    }>DO<{
-        // [t...] t
-        DUP // [t...] t t
-        HASHCU // [t...] t ht
-        1 GETGLOB // [t...] t ht h
-        EQUAL // [t...] t ?
-        IFJMP:<{
-            // [t...] t
-            1 PUSHINT // [t...] t 1
-            ONLYTOPX // t
-            RETALT
-        }>
-        // [t...] t
-        CTOS // [t...] ts
-        DUP // [t...] ts ts
-        SREFS // [t...] ts r
-        REPEAT:<{
-            // [t...] ts
-            LDREF // [t...] r ts
-        }>
-        // [t...] ts
-        DROP // [t...]
-    }>
+global cell result;
+global int h;
+
+() solve(cell t) impure {
+    if (cell_hash(t) == h) {
+        result = t;
+    } else {
+        slice s = t.begin_parse();
+        repeat (s.slice_refs()) {
+            solve(s~load_ref());
+        }
+    }
+}
+
+() help() impure asm """
     <b b> PUSHREF
+    1 SETGLOB
 """;
 
 ;; testable
 (cell) find_branch_by_hash(int hash, cell tree) method_id {
-    return solve(hash, tree);
+    help();
+    h = hash;
+    solve(tree);
+    return result;
 }
