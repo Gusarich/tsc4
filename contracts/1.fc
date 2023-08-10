@@ -10,46 +10,38 @@
 }
 
 (cell) solve(int h, cell t) asm """
-    // h t 
+    SWAP // t h
+    1 SETGLOB // t
     c2 SAVE
     SAMEALTSAVE
     WHILE:<{
-        // [t...] h [t]
-        DEPTH // [t...] h [t] 1/2+
-        1 GTINT // [t...] h [t] ?
+        // [t...]
+        DEPTH // [t...] d
+        ISPOS // [t...] ?
     }>DO<{
-        // [t...] h t
-        DUP // [t...] h t t
-        HASHCU // [t...] h t ht
-        s2 PUSH // [t...] h t ht h
-        EQUAL // [t...] h t ?
+        // [t...] t
+        DUP // [t...] t t
+        HASHCU // [t...] t ht
+        1 GETGLOB // [t...] t ht h
+        EQUAL // [t...] t ?
         IFJMP:<{
-            // [t...] h t
-            1 PUSHINT // [t...] h t 2
-            ONLYTOPX // h t
+            // [t...] t
+            1 PUSHINT // [t...] t 1
+            ONLYTOPX // t
             RETALT
         }>
-        // [t...] h t
-        CTOS // [t...] h ts
-        DUP // [t...] h ts ts
-        SREFS // [t...] h ts r
+        // [t...] t
+        CTOS // [t...] ts
+        DUP // [t...] ts ts
+        SREFS // [t...] ts r
         REPEAT:<{
-            // [t...] h ts
-            LDREF // [t...] h r ts
-            s1 s2 XCHG // [t...] r1...rn h ts
+            // [t...] ts
+            LDREF // [t...] r ts
         }>
-        // [t...] r1...rn h ts
-        DROP // [t...] r1...rn h
-        DEPTH // [t...] r1...rn h n+1
-        1 EQINT // [t...] r1...rn h ?
-        IF:<{
-            // h
-            DROP // 
-            <b b> PUSHREF // c
-            RETALT
-        }>
-        SWAP // [t...] r1...rn-1 h rn
+        // [t...] ts
+        DROP // [t...]
     }>
+    <b b> PUSHREF
 """;
 
 ;; testable
