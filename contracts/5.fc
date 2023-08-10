@@ -27,7 +27,7 @@ tuple solve(int n, int k) asm """
         // n k
         
         0 1 { 2dup + } 368 times
-        dictnew 369
+        dictnew 368
         {
             // ... a b D i
             2swap // ... D i a b
@@ -35,13 +35,15 @@ tuple solve(int n, int k) asm """
             <b swap 256 u, swap 256 u, b> <s // ... D i a v
             2swap // ... a v D i
             dup // ... a v D i i
-            5 -roll // ... i a v D i
+            4 -roll // ... i a v D i
             swap // ... i a v i D
             9 // ... i a v i D 9
-            idict! // ... i a D ?
+            udict! // ... i a D ?
             drop // ... i a D
             rot // ... a D i
-        } 370 times
+            1 - // ... a D i-1
+        } 369 times
+        drop swap drop // D
 
         PUSHREF // n k D
         SWAP // n D k
