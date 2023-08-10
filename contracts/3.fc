@@ -91,10 +91,7 @@ forall X -> int is_null(X) asm "ISNULL";
         cur = begin_cell();
     }
     cur = cur.store_slice(v);
-
-    if (cur.builder_bits() > 0) {
-        result = cons(cur, result);
-    }
+    result = cons(cur, result);
 
     builder res = begin_cell();
 
@@ -107,77 +104,4 @@ forall X -> int is_null(X) asm "ISNULL";
 }
 
 () recv_internal() {
-    ;; slice s = begin_cell()
-    ;;     .store_slice("abcde")
-    ;;     .store_ref(begin_cell()
-    ;;         .store_slice("fghijk")
-    ;;         .store_ref(begin_cell()
-    ;;             .store_slice("defgdefde")
-    ;;         .end_cell())
-    ;;     .end_cell())
-    ;; .end_cell().begin_parse();
-
-    ;; int flag = 0x64656667;
-    ;; int value = 0x515745;
-    
-    ;;
-    
-    ;; int sz = ubitsize(flag);
-    ;; int szv = ubitsize(value);
-
-    ;; tuple result = null();
-    ;; builder cur = begin_cell();
-    ;; int f? = true;
-    ;; while (f?) {
-    ;;     slice v = s.preload_tail(sz);
-    ;;     if (v.slice_bits() < sz) {
-    ;;         f? = false;
-    ;;     } else {
-    ;;         ~strdump(v);
-            
-    ;;         if (v.preload_uint(sz) == flag) {
-    ;;             ~strdump("Found!");
-    ;;             if (cur.builder_bits() + szv > 1023) {
-    ;;                 result = cons(cur, result);
-    ;;                 cur = begin_cell();
-    ;;             }
-    ;;             cur~store_uint(value, szv);
-    ;;             s~load_tail(sz - 1);
-    ;;         } else {
-    ;;             if (cur.builder_bits() + 1 > 1023) {
-    ;;                 result = cons(cur, result);
-    ;;                 cur = begin_cell();
-    ;;             }
-    ;;             cur~store_uint(v.preload_uint(1), 1);
-    ;;         }
-            
-    ;;         s~load_tail(1);
-
-    ;;         ~strdump("=====");
-    ;;     }
-    ;; }
-
-
-    ;; slice v = s.preload_tail(sz);
-    ;; if (cur.builder_bits() + v.slice_bits() > 1023) {
-    ;;     result = cons(cur, result);
-    ;;     cur = begin_cell();
-    ;; }
-    ;; cur = cur.store_slice(v);
-
-    ;; if (cur.builder_bits() > 0) {
-    ;;     result = cons(cur, result);
-    ;; }
-
-    ;; ~dump(result);
-
-    ;; builder res = begin_cell();
-
-    ;; while (~ is_null(result)) {
-    ;;     builder t = result~list_next();
-    ;;     res = begin_cell().store_builder(t).store_ref(res.end_cell());
-    ;; }
-
-    ;; ~dump(res.builder_bits());
-    ;; ~strdump(res.end_cell().begin_parse());
 }
