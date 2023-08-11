@@ -38,7 +38,7 @@ int f(int) asm """
         ;; } elseif ((x >= 97) & (x <= 122)) {
         ;;     x = (x + d + 7) % 26 + 97;
         ;; }
-        if (x & 64) {
+        if (x & 64 & (x <= 122)) {
             x = f(x);
         }
         b~store_uint(x, 8);
