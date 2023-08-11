@@ -90,32 +90,32 @@ int total_length(slice) asm "DUP SBITS SWAP DUP SDEPTH REPEAT:<{ LDREFRTOS NIP D
 
 ;; testable
 (cell) caesar_cipher_encrypt(int shift, cell text) method_id {
-    if (total_length(text.begin_parse()) > 3000) {
-        help_help((shift + 52) % 26);
-        return begin_cell()
-            .store_uint(0, 32)
-            .store_builder(store_caesar(text.begin_parse().skip_bits(32)))
-        .end_cell();
-    }
-    help_help2((shift + 52) % 26);
+    ;; if (total_length(text.begin_parse()) > 3000) {
+    help_help((shift + 52) % 26);
     return begin_cell()
         .store_uint(0, 32)
-        .store_builder(store_caesar2(text.begin_parse().skip_bits(32)))
+        .store_builder(store_caesar(text.begin_parse().skip_bits(32)))
     .end_cell();
+    ;; }
+    ;; help_help2((shift + 52) % 26);
+    ;; return begin_cell()
+    ;;     .store_uint(0, 32)
+    ;;     .store_builder(store_caesar2(text.begin_parse().skip_bits(32)))
+    ;; .end_cell();
 }
 
 ;; testable
 (cell) caesar_cipher_decrypt(int shift, cell text) method_id {
-    if (total_length(text.begin_parse()) > 3000) {
-        help_help((52 - shift) % 26);
-        return begin_cell()
-            .store_uint(0, 32)
-            .store_builder(store_caesar(text.begin_parse().skip_bits(32)))
-        .end_cell();
-    }
-    help_help2((52 - shift) % 26);
+    ;; if (total_length(text.begin_parse()) > 3000) {
+    help_help((52 - shift) % 26);
     return begin_cell()
         .store_uint(0, 32)
-        .store_builder(store_caesar2(text.begin_parse().skip_bits(32)))
+        .store_builder(store_caesar(text.begin_parse().skip_bits(32)))
     .end_cell();
+    ;; }
+    ;; help_help2((52 - shift) % 26);
+    ;; return begin_cell()
+    ;;     .store_uint(0, 32)
+    ;;     .store_builder(store_caesar2(text.begin_parse().skip_bits(32)))
+    ;; .end_cell();
 }
