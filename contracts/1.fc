@@ -12,33 +12,34 @@
 (cell) solve(int h, cell t) asm """
     SWAP // t h
     1 SETGLOB // t
-    c2 SAVE
-    SAMEALTSAVE
-    CONT:<{ <b b> PUSHREF RET }> c2 POP
-    AGAIN:<{
-        // [t...] t
-        DUP // [t...] t t
-        HASHCU // [t...] t ht
-        1 GETGLOB // [t...] t ht h
-        EQUAL // [t...] t ?
-        IFJMP:<{
+    TRY:<{
+        AGAINBRK:<{
             // [t...] t
-            1 PUSHINT // [t...] t 1
-            ONLYTOPX // t
-            RETALT
-        }>
-        // [t...] t
-        CTOS // [t...] ts
-        DUP // [t...] ts ts
-        SREFS // [t...] ts r
-        REPEAT:<{
+            DUP // [t...] t t
+            HASHCU // [t...] t ht
+            1 GETGLOB // [t...] t ht h
+            EQUAL // [t...] t ?
+            IFJMP:<{
+                // [t...] t
+                1 PUSHINT // [t...] t 1
+                ONLYTOPX // t
+                RETALT
+            }>
+            // [t...] t
+            CTOS // [t...] ts
+            DUP // [t...] ts ts
+            SREFS // [t...] ts r
+            REPEAT:<{
+                // [t...] ts
+                LDREF // [t...] r ts
+            }>
             // [t...] ts
-            LDREF // [t...] r ts
+            DROP // [t...]
         }>
-        // [t...] ts
-        DROP // [t...]
+    }>CATCH<{
+        DROP2
+        <b b> PUSHREF
     }>
-    <b b> PUSHREF
 """;
 
 ;; testable
