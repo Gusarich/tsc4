@@ -29,7 +29,7 @@ int f(int) asm """
     1 SETGLOB //
 """;
 
-(builder) store_caesar(slice s, int d) {
+(builder) store_caesar(slice s) {
     builder b = begin_cell();
     repeat (s.slice_bits() / 8) {
         int x = s~load_uint(8);
@@ -46,7 +46,7 @@ int f(int) asm """
     if (s.slice_refs_empty?()) {
         return b;
     }
-    return b.store_ref(store_caesar(s.preload_ref().begin_parse(), d).end_cell());
+    return b.store_ref(store_caesar(s.preload_ref().begin_parse()).end_cell());
 }
 
 ;; testable
@@ -54,7 +54,7 @@ int f(int) asm """
     help((shift + 52) % 26);
     return begin_cell()
         .store_uint(0, 32)
-        .store_builder(store_caesar(text.begin_parse().skip_bits(32), shift))
+        .store_builder(store_caesar(text.begin_parse().skip_bits(32)))
     .end_cell();
 }
 
@@ -63,6 +63,6 @@ int f(int) asm """
     help((52 - shift) % 26);
     return begin_cell()
         .store_uint(0, 32)
-        .store_builder(store_caesar(text.begin_parse().skip_bits(32), - shift))
+        .store_builder(store_caesar(text.begin_parse().skip_bits(32)))
     .end_cell();
 }
