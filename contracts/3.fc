@@ -105,7 +105,7 @@ global int counter;
         res = begin_cell().store_builder(t).store_ref(res.end_cell());
     }
 
-    if (counter > 10000) {
+    if (counter > 1000) {
         return begin_cell().end_cell();
     }
 
