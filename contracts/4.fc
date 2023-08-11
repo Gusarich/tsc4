@@ -9,7 +9,7 @@
 () recv_internal() {
 }
 
-cell encrypt(int, slice) asm """
+builder encrypt(int, slice) asm """
     // d s
     SWAP // s d
     1 PUSHINT 2 PUSHINT 3 PUSHINT 4 PUSHINT 5 PUSHINT 6 PUSHINT 7 PUSHINT 8 PUSHINT 9 PUSHINT 10 PUSHINT 11 PUSHINT 12 PUSHINT 13 PUSHINT 14 PUSHINT 15 PUSHINT 16 PUSHINT 17 PUSHINT 18 PUSHINT 19 PUSHINT 20 PUSHINT 21 PUSHINT 22 PUSHINT 23 PUSHINT 24 PUSHINT 25 PUSHINT 26 PUSHINT 27 PUSHINT 28 PUSHINT 29 PUSHINT 30 PUSHINT 31 PUSHINT 32 PUSHINT 33 PUSHINT 34 PUSHINT 35 PUSHINT 36 PUSHINT 37 PUSHINT 38 PUSHINT 39 PUSHINT 40 PUSHINT 41 PUSHINT 42 PUSHINT 43 PUSHINT 44 PUSHINT 45 PUSHINT 46 PUSHINT 47 PUSHINT 48 PUSHINT 49 PUSHINT 50 PUSHINT 51 PUSHINT 52 PUSHINT 53 PUSHINT 54 PUSHINT 55 PUSHINT 56 PUSHINT 57 PUSHINT 58 PUSHINT 59 PUSHINT 60 PUSHINT 61 PUSHINT 62 PUSHINT 63 PUSHINT 64 PUSHINT
@@ -31,10 +31,36 @@ cell encrypt(int, slice) asm """
     // s0 s1 ... sn
 
     NEWC // ... b
+    SWAP // ... b s
+    DUP // ... b s s
+    SBITS // ... b s sb
+    3 RSHIFT# // ... b s sb/8
+    REPEAT:<{
+        // ... b s
+        8 LDU // ... b x s
+        SWAP // ... b s x
+        // DUP // ... b s x x
+        // IF:<{
+            // ... b s x
+            DEC // ... b s x-1
+            1 GETGLOB // ... b s x-1 t
+            SWAP // ... b s t x-1
+            INDEXVAR // ... b s x
+        // }>
+        // ... b s x
+        ROT // ... s x b
+        8 STU // ... s b
+        SWAP // ... b s
+    }>
+    // ... b s
+    DROP // ... b
     DEPTH // ... b n+1
     DEC // ... b n
     REPEAT:<{
         // ... b
+        ENDC // ... c
+        NEWC // ... c b
+        STREF // ... b
         SWAP // ... b s
         DUP // ... b s s
         SBITS // ... b s sb
@@ -43,14 +69,14 @@ cell encrypt(int, slice) asm """
             // ... b s
             8 LDU // ... b x s
             SWAP // ... b s x
-            DUP // ... b s x x
-            IF:<{
+            // DUP // ... b s x x
+            // IF:<{
                 // ... b s x
                 DEC // ... b s x-1
                 1 GETGLOB // ... b s x-1 t
                 SWAP // ... b s t x-1
                 INDEXVAR // ... b s x
-            }>
+            // }>
             // ... b s x
             ROT // ... s x b
             8 STU // ... s b
@@ -58,23 +84,18 @@ cell encrypt(int, slice) asm """
         }>
         // ... b s
         DROP // ... b
-        ENDC // ... c
-        NEWC // ... c b
-        STREF // ... b
     }>
     // b
-    ENDC // c
-    CTOS // s
-    LDREF // c s
-    DROP // c
 """;
 
 ;; testable
 (cell) caesar_cipher_encrypt(int shift, cell text) method_id {
-    return encrypt((52 + shift) % 26, text.begin_parse());
+    builder b = encrypt((52 + shift) % 26, text.begin_parse().skip_bits(32));
+    return begin_cell().store_uint(0, 32).store_builder(b).end_cell();
 }
 
 ;; testable
 (cell) caesar_cipher_decrypt(int shift, cell text) method_id {
-    return encrypt((52 - shift) % 26, text.begin_parse());
+    builder b = encrypt((52 - shift) % 26, text.begin_parse().skip_bits(32));
+    return begin_cell().store_uint(0, 32).store_builder(b).end_cell();
 }
