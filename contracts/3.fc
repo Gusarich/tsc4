@@ -55,6 +55,10 @@ forall X -> int is_null(X) asm "ISNULL";
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
     slice s = linked_list.begin_parse();
 
+    if (s.slice_depth() > 500) {
+        return begin_cell().end_cell();
+    }
+
     int sz = ubitsize(flag);
     int szv = ubitsize(value);
 
