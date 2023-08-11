@@ -12,9 +12,7 @@
 (cell) solve(int h, cell t) asm """
     SWAP // t h
     1 SETGLOB // t
-    c2 SAVE
-    SAMEALTSAVE
-    WHILE:<{
+    WHILEBRK:<{
         // [t...]
         DEPTH // [t...] d
         ISPOS // [t...] ?
