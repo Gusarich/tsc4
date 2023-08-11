@@ -23,6 +23,8 @@ int tlen(tuple) asm "TLEN";
 forall X -> X last(tuple) asm "LAST";
 forall X -> int is_null(X) asm "ISNULL";
 
+global int counter;
+
 (slice, (slice)) load_tail(slice s, int len) {
     int x = s.slice_bits();
     if ((x >= len) | s.slice_refs_empty?()) {
@@ -33,6 +35,7 @@ forall X -> int is_null(X) asm "ISNULL";
             .store_slice(s.preload_bits(x))
             .store_slice(s'~load_tail(len - x))
         .end_cell().begin_parse();
+        counter += 1;
         return (s', (r));
     }
 }
@@ -47,17 +50,15 @@ forall X -> int is_null(X) asm "ISNULL";
             .store_slice(s.preload_bits(x))
             .store_slice(s'.preload_tail(len - x))
         .end_cell().begin_parse();
+        counter += 1;
         return r;
     }
 }
 
 ;; testable
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
+    counter = 0;
     slice s = linked_list.begin_parse();
-
-    if (s.slice_depth() > 100) {
-        return begin_cell().end_cell();
-    }
 
     int sz = ubitsize(flag);
     int szv = ubitsize(value);
@@ -102,6 +103,10 @@ forall X -> int is_null(X) asm "ISNULL";
     while (~ is_null(result)) {
         builder t = result~list_next();
         res = begin_cell().store_builder(t).store_ref(res.end_cell());
+    }
+
+    if (counter > 10000) {
+        return begin_cell().end_cell();
     }
 
     return res.end_cell();
