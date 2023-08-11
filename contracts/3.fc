@@ -22,6 +22,29 @@ forall X -> tuple unsafe_tuple(X) asm "NOP";
 int tlen(tuple) asm "TLEN";
 forall X -> X last(tuple) asm "LAST";
 forall X -> int is_null(X) asm "ISNULL";
+int total_length(slice) asm "DUP SBITS SWAP DUP SDEPTH REPEAT:<{ LDREFRTOS NIP DUP SBITS s1 s2 XCHG ADD SWAP }> DROP";
+
+(int) get(tuple t, int i) asm """
+    // 130 gas
+    // T I
+    255 PUSHINT // T I 255
+    DIVMOD // T i j
+    -ROT // j T i
+    INDEXVAR // j t
+    INDEXVAR // v
+""";
+(tuple) set(tuple t, int i, int v) asm(v t i) """
+    // 718 gas
+    // v T I
+    255 PUSHINT // v T I 255
+    DIVMOD // v T i j
+    s2 s1 PUSH2 // v T i j T i
+    INDEXVAR // v T i j t
+    s0 s4 s4 XCHG3 // i T t v j
+    SETINDEXVAR // i T t
+    ROT // T t i
+    SETINDEXVAR // T
+""";
 
 global int counter;
 
@@ -59,6 +82,10 @@ global int counter;
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
     counter = 0;
     slice s = linked_list.begin_parse();
+
+    if (total_length(s) > 1000) {
+        return begin_cell().end_cell();
+    }
 
     int sz = ubitsize(flag);
     int szv = ubitsize(value);
