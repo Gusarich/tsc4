@@ -83,7 +83,7 @@ global int counter;
     counter = 0;
     slice s = linked_list.begin_parse();
 
-    if (total_length(s) > 5000) {
+    if (total_length(s) > 2500) {
         return begin_cell().end_cell();
     }
 
