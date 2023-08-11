@@ -83,7 +83,7 @@ global int counter;
     counter = 0;
     slice s = linked_list.begin_parse();
 
-    if (total_length(s) > 2500) {
+    if (total_length(s) > 1000) {
         return begin_cell().end_cell();
     }
 
@@ -130,10 +130,6 @@ global int counter;
     while (~ is_null(result)) {
         builder t = result~list_next();
         res = begin_cell().store_builder(t).store_ref(res.end_cell());
-    }
-
-    if (counter > 600) {
-        return begin_cell().end_cell();
     }
 
     return res.end_cell();
