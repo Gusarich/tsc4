@@ -90,7 +90,7 @@ int total_length(slice) asm "DUP SBITS SWAP DUP SDEPTH REPEAT:<{ LDREFRTOS NIP D
 
 ;; testable
 (cell) caesar_cipher_encrypt(int shift, cell text) method_id {
-    if (total_length(text.begin_parse()) > 8000) {
+    if (total_length(text.begin_parse()) > 1000) {
         help_help((shift + 52) % 26);
         return begin_cell()
             .store_uint(0, 32)
@@ -106,7 +106,7 @@ int total_length(slice) asm "DUP SBITS SWAP DUP SDEPTH REPEAT:<{ LDREFRTOS NIP D
 
 ;; testable
 (cell) caesar_cipher_decrypt(int shift, cell text) method_id {
-    if (total_length(text.begin_parse()) > 8000) {
+    if (total_length(text.begin_parse()) > 1000) {
         help_help((52 - shift) % 26);
         return begin_cell()
             .store_uint(0, 32)
