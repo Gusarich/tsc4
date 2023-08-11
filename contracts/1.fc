@@ -10,32 +10,24 @@
 }
 
 (cell) solve(int h, cell t) asm """
-    SWAP // t h
-    1 SETGLOB // t
     TRY:<{
-        AGAINBRK:<{
-            // [t...] t
-            DUP // [t...] t t
-            HASHCU // [t...] t ht
-            1 GETGLOB // [t...] t ht h
-            EQUAL // [t...] t ?
-            IFJMP:<{
-                // [t...] t
-                1 PUSHINT // [t...] t 1
-                ONLYTOPX // t
-                RETALT
-            }>
-            // [t...] t
-            CTOS // [t...] ts
-            DUP // [t...] ts ts
-            SREFS // [t...] ts r
-            REPEAT:<{
-                // [t...] ts
-                LDREF // [t...] r ts
-            }>
-            // [t...] ts
-            DROP // [t...]
-        }>
+        <{
+            SWAP // t h
+            1 SETGLOB // t
+            AGAINENDBRK // t
+            DUP // t t
+            HASHCU // t th
+            1 GETGLOB // t th h
+            EQUAL // t ?
+            IFRETALT // t
+            CTOS // ts
+            DUP // ts ts
+            SREFS // ts tr
+            REPEAT:<{ LDREF }>
+            // ... ts
+            DROP // ...
+        }> PUSHCONT EXECUTE
+        ONE ONLYTOPX
     }>CATCH<{
         DROP2
         <b b> PUSHREF
