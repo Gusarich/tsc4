@@ -37,14 +37,14 @@ builder encrypt(int, slice) asm """
         // ... b s
         8 LDU // ... b x s
         SWAP // ... b s x
-        // DUP // ... b s x x
-        // IF:<{
+        DUP // ... b s x x
+        IF:<{
             // ... b s x
             DEC // ... b s x-1
             1 GETGLOB // ... b s x-1 t
             SWAP // ... b s t x-1
             INDEXVAR // ... b s x
-        // }>
+        }>
         // ... b s x
         ROT // ... s x b
         8 STU // ... s b
@@ -67,14 +67,14 @@ builder encrypt(int, slice) asm """
             // ... b s
             8 LDU // ... b x s
             SWAP // ... b s x
-            // DUP // ... b s x x
-            // IF:<{
+            DUP // ... b s x x
+            IF:<{
                 // ... b s x
                 DEC // ... b s x-1
                 1 GETGLOB // ... b s x-1 t
                 SWAP // ... b s t x-1
                 INDEXVAR // ... b s x
-            // }>
+            }>
             // ... b s x
             ROT // ... s x b
             8 STU // ... s b
