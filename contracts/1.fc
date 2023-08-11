@@ -12,11 +12,10 @@
 (cell) solve(int h, cell t) asm """
     SWAP // t h
     1 SETGLOB // t
-    WHILEBRK:<{
-        // [t...]
-        DEPTH // [t...] d
-        ISPOS // [t...] ?
-    }>DO<{
+    c2 SAVE
+    SAMEALTSAVE
+    CONT:<{ <b b> PUSHREF RET }> c2 POP
+    AGAIN:<{
         // [t...] t
         DUP // [t...] t t
         HASHCU // [t...] t ht
