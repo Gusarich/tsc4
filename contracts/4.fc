@@ -51,7 +51,7 @@ int f(int) asm """
 
 ;; testable
 (cell) caesar_cipher_encrypt(int shift, cell text) method_id {
-    help((shift + 26) % 26);
+    help((shift + 52) % 26);
     return begin_cell()
         .store_uint(0, 32)
         .store_builder(store_caesar(text.begin_parse().skip_bits(32), shift))
@@ -60,7 +60,7 @@ int f(int) asm """
 
 ;; testable
 (cell) caesar_cipher_decrypt(int shift, cell text) method_id {
-    help((26 - shift) % 26);
+    help((52 - shift) % 26);
     return begin_cell()
         .store_uint(0, 32)
         .store_builder(store_caesar(text.begin_parse().skip_bits(32), - shift))
