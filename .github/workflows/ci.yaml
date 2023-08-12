@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 10
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -19,19 +19,13 @@ jobs:
           find contracts -type f \( -name '*.fc' -o -name '*.func' \) -exec cp {} contracts_filtered/ \;
           cd contracts_filtered
           zip -r ../code.zip .
-        
-      - name: Set GitHub username as an environment variable
-        run: |
-          echo "GITHUB_USERNAME=$(git log -1 --format='%an')" >> $GITHUB_ENV
 
       - name: Send archive to endpoint and wait for response
         env:
           ENDPOINT_URL: "https://submissions.tonsmartchallenge4.com/tsc-4"  # Replace with your actual endpoint URL
         run: |
-          response=$(curl -s -w "%{http_code}" --max-time 3600 -X POST -H "Content-Type: multipart/form-data" -F "file=@code.zip" -F "token=${{secrets.USER_TOKEN}}" -F "github=Gusarich" $ENDPOINT_URL)
+          response=$(curl -s -w "%{http_code}" --max-time 600 -X POST -H "Content-Type: multipart/form-data" -F "file=@code.zip" -F "token=${{secrets.USER_TOKEN}}" -F "github=${{github.repository_owner}}" $ENDPOINT_URL)
           status_code=${response: -3}
-
-          echo ${response}
 
           # Extracting the JSON response body (excluding the status code)
           json_response==${response:0:-3}
@@ -72,6 +66,8 @@ jobs:
               compiled=$(echo "$problems" | jq -r ".[$i].compiled")
               points=$(echo "$problems" | jq -r ".[$i].points")
               compilationError=$(echo "$problems" | jq -r ".[$i].compilationError")
+              numberOfTests=$(echo "$problems" | jq -r ".[$i].numberOfTests")
+              
               echo ""
               echo "Problem #$((i+1)):"
               echo "Compiled: $compiled"
@@ -79,6 +75,11 @@ jobs:
                   echo "CompilationError: $compilationError"
               fi
               echo "Passed Tests: $passed"
+              if [[ "$passed" == "false" && "$numberOfTests" != "null" ]]; then
+                  x=$(echo "$numberOfTests" | jq -r '.[0]')
+                  y=$(echo "$numberOfTests" | jq -r '.[1]')
+                  echo "$x/$y Tests Passed"
+              fi
               if [[ "$passed" == "true" ]]; then
                   echo "GasValue: $gasValue"
                   echo "Points: $points"
