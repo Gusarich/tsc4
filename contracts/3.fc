@@ -86,7 +86,7 @@ int total_length(slice) asm "DUP SBITS SWAP DUP SDEPTH REPEAT:<{ LDREFRTOS NIP D
         ss = ss~load_ref().begin_parse();
         mn = min(mn, ss.slice_bits());
     }
-    if (mn < 700) {
+    if (mn < 1023) {
         return begin_cell().end_cell();
     }
 
