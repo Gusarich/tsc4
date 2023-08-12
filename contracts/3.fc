@@ -46,7 +46,7 @@ int total_length(slice) asm "DUP SBITS SWAP DUP SDEPTH REPEAT:<{ LDREFRTOS NIP D
     SETINDEXVAR // T
 """;
 
-() waste() impure asm "NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP";
+() waste() impure asm "NOP NOP NOP NOP NOP NOP NOP";
 
 (slice, (slice)) load_tail(slice s, int len) {
     int x = s.slice_bits();
