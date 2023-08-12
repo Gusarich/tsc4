@@ -9,27 +9,25 @@
 () recv_internal() {
 }
 
-(cell) solve(int h, cell t) asm """    
+(cell) solve(int h, cell t) asm """
     <{
         SWAP // t h
         1 SETGLOB // t
-
         DUP // t t
         HASHCU // t th
         1 GETGLOB // t th h
-        EQUAL // t ?    
-        IFNOT:<{
-            UNTILEND // t
-            CTOS // ts
-            DUP // ts ts
-            SREFS // ts tr
-            REPEAT:<{ LDREF }> // ... ts
-            DROP // ...
-            DUP // t t
-            HASHCU // t th
-            1 GETGLOB // t th h
-            EQUAL // t ?
-        }>
+        EQUAL // t ?
+        IFRET // t
+        UNTILEND // t
+        CTOS // ts
+        DUP // ts ts
+        SREFS // ts tr
+        REPEAT:<{ LDREF }> // ... ts
+        DROP // ...
+        DUP // t t
+        HASHCU // t th
+        1 GETGLOB // t th h
+        EQUAL // t ?
     }> PUSHCONT
     <{
         <b b> PUSHREF
