@@ -27,6 +27,13 @@ forall X -> int is_null(X) asm "ISNULL";
     int x = a.slice_bits();
     if (x >= len) {
         int r = a~load_uint(len);
+        if (a.slice_empty?()) {
+            if (b.slice_refs_empty?()) {
+                return (b, "", r);
+            }
+            slice c = b~load_ref().begin_parse();
+            return (b, c, r);
+        }
         return (a, b, r);
     } else {
         int y = b.slice_bits();
@@ -60,7 +67,10 @@ int preload_tail(slice a, slice b, int len) {
 ;; testable
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
     slice s = linked_list.begin_parse();
-    slice next = s.slice_refs_empty?() ? "" : s~load_ref().begin_parse();
+    slice next = "";
+    if (s.slice_refs()) {
+        next = s~load_ref().begin_parse();
+    }
 
     int sz = ubitsize(flag);
     int szv = ubitsize(value);
@@ -69,7 +79,6 @@ int preload_tail(slice a, slice b, int len) {
     builder cur = begin_cell();
 
     do {
-        ~dump([s, next]);
         int x = preload_tail(s, next, sz);
         if (x == flag) {
             if (cur.builder_bits() + szv > 1023) {
