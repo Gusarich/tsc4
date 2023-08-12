@@ -46,7 +46,7 @@ int total_length(slice) asm "DUP SBITS SWAP DUP SDEPTH REPEAT:<{ LDREFRTOS NIP D
     SETINDEXVAR // T
 """;
 
-global int counter;
+() waste() impure asm "NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP";
 
 (slice, (slice)) load_tail(slice s, int len) {
     int x = s.slice_bits();
@@ -58,7 +58,6 @@ global int counter;
             .store_slice(s.preload_bits(x))
             .store_slice(s'~load_tail(len - x))
         .end_cell().begin_parse();
-        counter += 1;
         return (s', (r));
     }
 }
@@ -73,22 +72,16 @@ global int counter;
             .store_slice(s.preload_bits(x))
             .store_slice(s'.preload_tail(len - x))
         .end_cell().begin_parse();
-        counter += 1;
         return r;
     }
 }
 
 ;; testable
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
-    counter = 0;
     slice s = linked_list.begin_parse();
 
     if (flag == value) {
         return linked_list;
-    }
-
-    if (total_length(s) > 100000) {
-        return begin_cell().end_cell();
     }
 
     int sz = ubitsize(flag);
@@ -109,6 +102,9 @@ global int counter;
                 }
                 cur~store_uint(value, szv);
                 s~load_tail(sz - 1);
+                repeat (sz - 1) {
+                    waste();
+                }
             } else {
                 if (cur.builder_bits() + 1 > 1023) {
                     result = cons(cur, result);
@@ -118,6 +114,7 @@ global int counter;
             }
             
             s~load_tail(1);
+            waste();
         }
     }
 
