@@ -82,7 +82,7 @@ int total_length(slice) asm "DUP SBITS SWAP DUP SDEPTH REPEAT:<{ LDREFRTOS NIP D
 
     slice ss = s;
     int mn = ss.slice_bits();
-    repeat (ss.slice_refs()) {
+    repeat (ss.slice_refs() - 1) {
         ss = ss~load_ref().begin_parse();
         mn = min(mn, ss.slice_bits());
     }
