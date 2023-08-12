@@ -19,7 +19,7 @@
         1 GETGLOB // t th h
         EQUAL // t ?    
         IFNOT:<{
-            UNTILENDBRK // t
+            UNTILEND // t
             CTOS // ts
             DUP // ts ts
             SREFS // ts tr
