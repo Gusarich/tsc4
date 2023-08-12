@@ -19,20 +19,20 @@
         EQUAL // t ?
         IFRET // t
         UNTILEND // t
-        CTOS // ts
-        DUP // ts ts
-        SREFS // ts tr
+        CTOS // ... ts
+        DUP // ... ts ts
+        SREFS // ... ts tr
         REPEAT:<{ LDREF }> // ... ts
         DROP // ...
-        DUP // t t
-        HASHCU // t th
-        1 GETGLOB // t th h
-        EQUAL // t ?
+        DUP // ... t t
+        HASHCU // ... t th
+        1 GETGLOB // ... t th h
+        EQUAL // ... t ?
     }> PUSHCONT
     <{
-        <b b> PUSHREF
+        <b b> PUSHREF // t
     }> PUSHCONT
-    2 1 TRYARGS
+    2 1 TRYARGS // t
 """;
 
 ;; testable
