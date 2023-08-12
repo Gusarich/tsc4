@@ -87,7 +87,7 @@ global int counter;
         return linked_list;
     }
 
-    if (total_length(s) > 20000) {
+    if (total_length(s) > 40000) {
         return begin_cell().end_cell();
     }
 
