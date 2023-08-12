@@ -10,7 +10,7 @@
 }
 
 (cell) solve(int h, cell t) asm """
-    TRY:<{
+    <{
         <{
             SWAP // t h
             1 SETGLOB // t
@@ -26,11 +26,11 @@
             REPEAT:<{ LDREF }> // ... ts
             DROP // ...
         }> PUSHCONT EXECUTE
-        1 RETARGS
-    }>CATCH<{
-        DROP2
+    }> PUSHCONT
+    <{
         <b b> PUSHREF
-    }>
+    }> PUSHCONT
+    2 1 TRYARGS
 """;
 
 ;; testable
