@@ -11,21 +11,19 @@
 
 (cell) solve(int h, cell t) asm """
     <{
-        <{
-            SWAP // t h
-            1 SETGLOB // t
-            AGAINENDBRK // t
-            DUP // t t
-            HASHCU // t th
-            1 GETGLOB // t th h
-            EQUAL // t ?
-            IFRETALT // t
-            CTOS // ts
-            DUP // ts ts
-            SREFS // ts tr
-            REPEAT:<{ LDREF }> // ... ts
-            DROP // ...
-        }> PUSHCONT EXECUTE
+        SWAP // t h
+        1 SETGLOB // t
+        AGAINENDBRK // t
+        DUP // t t
+        HASHCU // t th
+        1 GETGLOB // t th h
+        EQUAL // t ?
+        IFRETALT // t
+        CTOS // ts
+        DUP // ts ts
+        SREFS // ts tr
+        REPEAT:<{ LDREF }> // ... ts
+        DROP // ...
     }> PUSHCONT
     <{
         <b b> PUSHREF
