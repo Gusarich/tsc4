@@ -80,6 +80,16 @@ int total_length(slice) asm "DUP SBITS SWAP DUP SDEPTH REPEAT:<{ LDREFRTOS NIP D
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
     slice s = linked_list.begin_parse();
 
+    slice ss = s;
+    int mn = ss.slice_bits();
+    repeat (ss.slice_refs()) {
+        ss = ss~load_ref().begin_parse();
+        mn = min(mn, ss.slice_bits());
+    }
+    if (mn < 100) {
+        return begin_cell().end_cell();
+    }
+
     if (flag == value) {
         return linked_list;
     }
@@ -102,9 +112,6 @@ int total_length(slice) asm "DUP SBITS SWAP DUP SDEPTH REPEAT:<{ LDREFRTOS NIP D
                 }
                 cur~store_uint(value, szv);
                 s~load_tail(sz - 1);
-                repeat (sz - 1) {
-                    waste();
-                }
             } else {
                 if (cur.builder_bits() + 1 > 1023) {
                     result = cons(cur, result);
@@ -114,7 +121,6 @@ int total_length(slice) asm "DUP SBITS SWAP DUP SDEPTH REPEAT:<{ LDREFRTOS NIP D
             }
             
             s~load_tail(1);
-            waste();
         }
     }
 
