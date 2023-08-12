@@ -12,22 +12,21 @@
 (cell) solve(int h, cell t) asm """
     TRY:<{
         <{
-            AGAINENDBRK
-
-            // h t
-            DUP2 // h t h t
-            HASHCU // h t h th
-            EQUAL // h t ?
-            IFRETALT // h t
-            CTOS // h ts
-            DUP // h ts ts
-            SREFS // h ts tr
-            REPEAT:<{ LDREF s1 s2 XCHG }> // ... h ts
+            SWAP // t h
+            1 SETGLOB // t
+            AGAINENDBRK // t
+            DUP // t t
+            HASHCU // t th
+            1 GETGLOB // t th h
+            EQUAL // t ?
+            IFRETALT // t
+            CTOS // ts
+            DUP // ts ts
+            SREFS // ts tr
+            REPEAT:<{ LDREF }> // ... ts
             DROP // ...
-            SWAP
-        
         }> PUSHCONT EXECUTE
-        ONE ONLYTOPX
+        1 RETARGS
     }>CATCH<{
         DROP2
         <b b> PUSHREF
