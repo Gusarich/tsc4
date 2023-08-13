@@ -26,7 +26,7 @@ tuple solve(int n, int k) asm """
     }>
     SWAP // k n
     DUP // k n n
-    10 LESSINT // k n ?
+    25 LESSINT // k n ?
     IFJMP:<{
         SWAP // n k
         DUP // n k k
@@ -51,52 +51,6 @@ tuple solve(int n, int k) asm """
         }>
     }>
     SWAP // n k
-    DUP // n k k
-    180 GTINT // n k ?
-    IFJMP:<{
-        1 SETGLOB // n
-        0 1 { 2dup + } 368 times
-        dictnew 368
-        {
-            // ... a b D i
-            2swap // ... D i a b
-            over // ... D i a b a
-            <{ // ... D i a b a B
-                swap // ... D i a b B a
-                PUSHINT // ... D i a b B
-                swap // ... D i a B b
-                PUSHINT // ... D i a B
-                {
-                    DUP2 ADD // ... D i a B
-                } // ... D i a B e
-                369 // ... D i a B e 369
-                4 pick // ... D i a B e 369 i
-                - // ... D i a B e 369-i
-                255 // ... D i a B e 369-i 255
-                min // ... D i a B e min(369-i,255)
-                times // ... D i a B
-            }>s // ... D i a v
-            2swap // ... a v D i
-            dup // ... a v D i i
-            4 -roll // ... i a v D i
-            swap // ... i a v i D
-            9 // ... i a v i D 9
-            udict! // ... i a D ?
-            drop // ... i a D
-            rot // ... a D i
-            1 - // ... a D i-1
-        } 369 times
-        drop swap drop // D
-        PUSHREF // n D
-        9 PUSHINT // n D 9
-        DICTUGETEXEC // ...
-        1 GETGLOB // ... k
-        ONLYX // ...
-        DEPTH // ... k
-        TUPLEVAR // ... t
-        1 RETARGS
-    }>
-    // n k
     DEC // n k-1
     SWAP // k-1 n
     0 1 { 2dup + } 368 times
