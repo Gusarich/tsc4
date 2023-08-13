@@ -26,7 +26,7 @@ tuple solve(int n, int k) asm """
     }>
     SWAP // k n
     DUP // k n n
-    25 LESSINT // k n ?
+    50 LESSINT // k n ?
     IFJMP:<{
         SWAP // n k
         DUP // n k k
