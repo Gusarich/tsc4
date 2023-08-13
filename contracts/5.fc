@@ -18,6 +18,13 @@
 
 tuple solve(int n, int k) asm """
     // n k
+    DUP // n k k
+    IFNOTJMP:<{
+        // n k
+        DROP2 //
+        NIL // t
+    }>
+    // n k
     DEC // n k-1
     1 SETGLOB // n
     0 1 { 2dup + } 368 times
