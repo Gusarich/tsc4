@@ -24,9 +24,11 @@ tuple solve(int n, int k) asm """
         DROP2 //
         NIL // t
     }>
-    DUP // n k k
-    200 LESSINT // n k ?
+    SWAP // k n
+    DUP // k n n
+    50 LESSINT // k n ?
     IFJMP:<{
+        SWAP // n k
         DUP // n k k
         1 SETGLOB // n k
         ADD // n+k
@@ -48,6 +50,7 @@ tuple solve(int n, int k) asm """
             1 RETARGS
         }>
     }>
+    SWAP // n k
     1 SETGLOB // n
     0 1 { 2dup + } 368 times
     dictnew 368
