@@ -17,6 +17,9 @@
 }
 
 tuple solve(int n, int k) asm """
+    DUP // n k k
+    255 EQINT // n k ?
+    999 THROWIF // n k
     // n k
     DUP // n k k
     IFNOTJMP:<{
