@@ -61,7 +61,6 @@ tuple solve(int n, int k) asm """
     PUSHREF // n D
     9 PUSHINT // n D 9
     DICTUGETEXEC // ...
-    DUMPSTK
     1 GETGLOB // ... k
     ONLYX // ...
     DEPTH // ... k
