@@ -26,7 +26,7 @@ tuple solve(int n, int k) asm """
     }>
     // n k
     DEC // n k-1
-    1 SETGLOB // n
+    SWAP // k-1 n
     0 1 { 2dup + } 368 times
     dictnew 368
     {
@@ -45,13 +45,13 @@ tuple solve(int n, int k) asm """
         1 - // ... a D i-1
     } 369 times
     drop swap drop
-    PUSHREF // n D
-    9 PUSHINT // n D 9
-    DICTUGET // v ?
-    DROP // v
-    256 LDU // a v
-    256 LDU // a b v
-    1 GETGLOB // a b v k-1
+    PUSHREF // k-1 n D
+    9 PUSHINT // k-1 n D 9
+    DICTUGET // k-1 v ?
+    DROP // k-1 v
+    256 LDU // k-1 a v
+    256 LDU // k-1 a b v
+    3 ROLL // a b v k-1
     DUP // a b v k-1 k-1
     IFNOTJMP:<{
         // a b v k-1
@@ -59,13 +59,13 @@ tuple solve(int n, int k) asm """
         SINGLE // t
     }>
     // a b v k-1
-    NIP // a b k-1
+    DEC // a b v k-2
+    NIP // a b k-2
     REPEAT:<{
         // [...] a b
         DUP2 // [...] a b a b
         ADD // [...] a b c
     }>
-    DROP // [...]
     DEPTH // [...] k
     TUPLEVAR // t
 """;
@@ -74,4 +74,3 @@ tuple solve(int n, int k) asm """
 tuple fibonacci_sequence(int n, int k) method_id {
     return solve(n, k);
 }
-
