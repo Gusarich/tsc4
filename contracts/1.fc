@@ -10,9 +10,14 @@
 }
 
 (cell) solve(int h, cell t) asm """
+    SWAP // t h
+    1 SETGLOB // t
+    DUP // t t
+    HASHCU // t th
+    1 GETGLOB // t th h
+    EQUAL // t ?
+    IFRET // t
     <{
-        SWAP // t h
-        1 SETGLOB // t
         UNTILEND // t
         CTOS // ... ts
         DUP // ... ts ts
@@ -27,7 +32,7 @@
     <{
         <b b> PUSHREF // t
     }> PUSHCONT
-    2 1 TRYARGS // t
+    1 1 TRYARGS // t
 """;
 
 ;; testable
