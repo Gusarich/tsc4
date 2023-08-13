@@ -52,7 +52,7 @@ tuple solve(int n, int k) asm """
     }>
     SWAP // n k
     DUP // n k k
-    220 GTINT // n k ?
+    250 GTINT // n k ?
     IFJMP:<{
         1 SETGLOB // n
         0 1 { 2dup + } 368 times
