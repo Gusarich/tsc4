@@ -26,7 +26,7 @@ tuple solve(int n, int k) asm """
     }>
     SWAP // k n
     DUP // k n n
-    50 LESSINT // k n ?
+    25 LESSINT // k n ?
     IFJMP:<{
         SWAP // n k
         DUP // n k k
@@ -51,28 +51,61 @@ tuple solve(int n, int k) asm """
         }>
     }>
     SWAP // n k
-    1 SETGLOB // n
+    DUP // n k k
+    220 GTINT // n k ?
+    IFJMP:<{
+        1 SETGLOB // n
+        0 1 { 2dup + } 368 times
+        dictnew 368
+        {
+            // ... a b D i
+            2swap // ... D i a b
+            over // ... D i a b a
+            <{ // ... D i a b a B
+                swap // ... D i a b B a
+                PUSHINT // ... D i a b B
+                swap // ... D i a B b
+                PUSHINT // ... D i a B
+                {
+                    DUP2 ADD // ... D i a B
+                } // ... D i a B e
+                369 // ... D i a B e 369
+                4 pick // ... D i a B e 369 i
+                - // ... D i a B e 369-i
+                255 // ... D i a B e 369-i 255
+                min // ... D i a B e min(369-i,255)
+                times // ... D i a B
+            }>s // ... D i a v
+            2swap // ... a v D i
+            dup // ... a v D i i
+            4 -roll // ... i a v D i
+            swap // ... i a v i D
+            9 // ... i a v i D 9
+            udict! // ... i a D ?
+            drop // ... i a D
+            rot // ... a D i
+            1 - // ... a D i-1
+        } 369 times
+        drop swap drop // D
+        PUSHREF // n D
+        9 PUSHINT // n D 9
+        DICTUGETEXEC // ...
+        1 GETGLOB // ... k
+        ONLYX // ...
+        DEPTH // ... k
+        TUPLEVAR // ... t
+        1 RETARGS
+    }>
+    // n k
+    DEC // n k-1
+    SWAP // k-1 n
     0 1 { 2dup + } 368 times
     dictnew 368
     {
         // ... a b D i
         2swap // ... D i a b
         over // ... D i a b a
-        <{ // ... D i a b a B
-            swap // ... D i a b B a
-            PUSHINT // ... D i a b B
-            swap // ... D i a B b
-            PUSHINT // ... D i a B
-            {
-                DUP2 ADD // ... D i a B
-            } // ... D i a B e
-            369 // ... D i a B e 369
-            4 pick // ... D i a B e 369 i
-            - // ... D i a B e 369-i
-            255 // ... D i a B e 369-i 255
-            min // ... D i a B e min(369-i,255)
-            times // ... D i a B
-        }>s // ... D i a v
+        <b swap 256 u, swap 256 u, b> <s // ... D i a v
         2swap // ... a v D i
         dup // ... a v D i i
         4 -roll // ... i a v D i
@@ -83,15 +116,30 @@ tuple solve(int n, int k) asm """
         rot // ... a D i
         1 - // ... a D i-1
     } 369 times
-    drop swap drop // D
-    PUSHREF // n D
-    9 PUSHINT // n D 9
-    DICTUGETEXEC // ...
-    1 GETGLOB // ... k
-    ONLYX // ...
-    DEPTH // ... k
-    TUPLEVAR // ... t
-    1 RETARGS
+    drop swap drop
+    PUSHREF // k-1 n D
+    9 PUSHINT // k-1 n D 9
+    DICTUGET // k-1 v ?
+    DROP // k-1 v
+    256 LDU // k-1 a v
+    256 LDU // k-1 a b v
+    3 ROLL // a b v k-1
+    DUP // a b v k-1 k-1
+    IFNOTJMP:<{
+        // a b v k-1
+        3 BLKDROP // a
+        SINGLE // t
+    }>
+    // a b v k-1
+    DEC // a b v k-2
+    NIP // a b k-2
+    REPEAT:<{
+        // [...] a b
+        DUP2 // [...] a b a b
+        ADD // [...] a b c
+    }>
+    DEPTH // [...] k
+    TUPLEVAR // t
 """;
 
 ;; testable
