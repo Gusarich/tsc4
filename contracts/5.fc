@@ -24,8 +24,31 @@ tuple solve(int n, int k) asm """
         DROP2 //
         NIL // t
     }>
+    DUP // n k k
+    200 LESSINT // n k ?
+    IFJMP:<{
+        DUP // n k k
+        1 SETGLOB // n k
+        ADD // n+k
+        0 PUSHINT // n+k 0
+        1 PUSHINT // n+k 0 1
+        ROT // 0 1 n+k
+        -2 ADDCONST // 0 1 n+k-2
+        DUP // 0 1 n+k-2 n+2-2
+        -1 EQINT // 0 1 n+k-2 ?
+        IF:<{
+            // 0 1 n+k-2
+            DROP2 // 0
+            SINGLE // t
+        }>ELSE<{
+            // 0 t n+k-2
+            REPEAT:<{ DUP2 ADD }> // 0 1 ... f(n+k)
+            1 GETGLOB // ... k
+            TUPLEVAR // ... t
+            1 RETARGS
+        }>
+    }>
     1 SETGLOB // n
-    
     0 1 { 2dup + } 368 times
     dictnew 368
     {
