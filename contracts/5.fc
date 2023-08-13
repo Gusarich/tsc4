@@ -17,17 +17,6 @@
 }
 
 tuple solve(int n, int k) asm """
-    DUP // n k k
-    255 EQINT // n k ?
-    999 THROWIF // n k
-
-    // n k
-    DUP // n k k
-    IFNOTJMP:<{
-        // n k
-        DROP2 //
-        NIL // t
-    }>
     // n k
     DEC // n k-1
     1 SETGLOB // n
