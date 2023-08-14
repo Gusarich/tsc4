@@ -17,6 +17,7 @@
 -}
 
 int ubitsize(int) asm "UBITSIZE";
+int test_builder(builder, int) asm "BCHKBITSQ";
 
 (slice, (int, int)) load_tail(slice s, int l) {
     int x = s.slice_bits();
@@ -38,10 +39,10 @@ int ubitsize(int) asm "UBITSIZE";
 }
 
 (tuple, builder) write(tuple res, builder cur, int val, int szv) {
-    if (cur.builder_bits() + szv > 1023) {
-        return (cons(cur, res), begin_cell().store_uint(val, szv));
+    if (cur.test_builder(szv)) {
+        return (res, cur.store_uint(val, szv));
     }
-    return (res, cur.store_uint(val, szv));
+    return (cons(cur, res), begin_cell().store_uint(val, szv));
 }
 
 int pow2dec(int x) inline asm "DEC POW2 DUP DEC ADD";
