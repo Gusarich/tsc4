@@ -19,7 +19,7 @@
 int ubitsize(int) asm "UBITSIZE";
 int test_builder(builder, int) asm "BCHKBITSQ";
 
-(slice, (int, int)) load_tail(slice s, int l) inline {
+(slice, (int, int)) load_tail(slice s, int l) {
     int x = s.slice_bits();
     if (x >= l) {
         int w = s~load_uint(l);
@@ -33,7 +33,7 @@ int test_builder(builder, int) asm "BCHKBITSQ";
         return (s, (w, x));
     }
     int y = s.preload_uint(x);
-    s = s~load_ref().begin_parse();
+    s = s.preload_ref().begin_parse();
     (int z, int w) = s~load_tail(l - x);
     return (s, ((y << w) + z, x + w));
 }
@@ -44,8 +44,6 @@ int test_builder(builder, int) asm "BCHKBITSQ";
     }
     return (cons(cur, res), begin_cell().store_uint(val, szv));
 }
-
-int pow2dec(int x) inline asm "DEC POW2 DUP DEC ADD";
 
 int pfx(int x, int l, int n) inline asm """
     // x l n
