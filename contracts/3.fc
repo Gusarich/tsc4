@@ -19,7 +19,7 @@
 int ubitsize(int) asm "UBITSIZE";
 int test_builder(builder, int) asm "BCHKBITSQ";
 
-(slice, (int, int)) load_tail(slice s, int l) {
+(slice, (int, int)) load_tail(slice s, int l) inline {
     int x = s.slice_bits();
     if (x >= l) {
         int w = s~load_uint(l);
@@ -104,7 +104,7 @@ int substr(int x, int l, int a, int b) inline asm """
     while (w >= sz) {
         int i = 0;
         int last = 0;
-        int e = min(128, w - sz);
+        int e = w - sz;
         while (i <= e) {
             int y = substr(x, w, i, i + sz);
             if (y == flag) {
