@@ -17,115 +17,105 @@
 -}
 
 int ubitsize(int) asm "UBITSIZE";
-forall X -> X tpop(tuple) asm "TPOP";
-forall X -> tuple unsafe_tuple(X) asm "NOP";
-int tlen(tuple) asm "TLEN";
-forall X -> X last(tuple) asm "LAST";
-forall X -> int is_null(X) asm "ISNULL";
-int total_length(slice) asm "DUP SBITS SWAP DUP SDEPTH REPEAT:<{ LDREFRTOS NIP DUP SBITS s1 s2 XCHG ADD SWAP }> DROP";
 
-(int) get(tuple t, int i) asm """
-    // 130 gas
-    // T I
-    255 PUSHINT // T I 255
-    DIVMOD // T i j
-    -ROT // j T i
-    INDEXVAR // j t
-    INDEXVAR // v
-""";
-(tuple) set(tuple t, int i, int v) asm(v t i) """
-    // 718 gas
-    // v T I
-    255 PUSHINT // v T I 255
-    DIVMOD // v T i j
-    s2 s1 PUSH2 // v T i j T i
-    INDEXVAR // v T i j t
-    s0 s4 s4 XCHG3 // i T t v j
-    SETINDEXVAR // i T t
-    ROT // T t i
-    SETINDEXVAR // T
-""";
-
-() waste() impure asm "NOP NOP NOP NOP NOP NOP NOP";
-
-(slice, (slice)) load_tail(slice s, int len) {
+(slice, (int, int)) load_tail(slice s, int l) {
     int x = s.slice_bits();
-    if ((x >= len) | s.slice_refs_empty?()) {
-        return s.load_bits(min(len, x));
-    } else {
-        slice s' = s~load_ref().begin_parse();
-        slice r = begin_cell()
-            .store_slice(s.preload_bits(x))
-            .store_slice(s'~load_tail(len - x))
-        .end_cell().begin_parse();
-        return (s', (r));
+    if (x >= l) {
+        int w = s~load_uint(l);
+        return (s, (w, l));
     }
+    if (s.slice_empty?()) {
+        return (s, (0, 0));
+    }
+    if (s.slice_refs_empty?()) {
+        int w = s~load_uint(x);
+        return (s, (w, x));
+    }
+    int y = s.preload_uint(x);
+    s = s.preload_ref().begin_parse();
+    (int z, int w) = s~load_tail(l - x);
+    return (s, (y << (l - x) + z, x + w));
 }
 
-(slice) preload_tail(slice s, int len) {
-    int x = s.slice_bits();
-    if ((x >= len) | s.slice_refs_empty?()) {
-        return s.preload_bits(min(len, x));
-    } else {
-        slice s' = s.preload_ref().begin_parse();
-        slice r = begin_cell()
-            .store_slice(s.preload_bits(x))
-            .store_slice(s'.preload_tail(len - x))
-        .end_cell().begin_parse();
-        return r;
+(tuple, builder) write(tuple res, builder cur, int val, int szv) {
+    if (cur.builder_bits() + szv > 1023) {
+        return (cons(cur, res), begin_cell().store_uint(val, szv));
     }
+    return (res, cur.store_uint(val, szv));
+}
+
+int pow2dec(int x) inline asm "DEC POW2 DUP DEC ADD";
+
+int pfx(int x, int l, int n) inline {
+    if (n == 0) {
+        return 0;
+    }
+    return (x & (((1 << n) - 1) << (l - n))) >> (l - n);
+}
+
+int sfx(int x, int n) inline {
+    if (n == 0) {
+        return 0;
+    }
+    return x & pow2dec(n);
+}
+
+int substr(int x, int l, int a, int b) inline {
+    if (a == b) {
+        return 0;
+    }
+    return pfx(sfx(x, l - a), l - a, b - a);
 }
 
 ;; testable
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
     slice s = linked_list.begin_parse();
 
-    if (flag == value) {
-        return linked_list;
-    }
-
     int sz = ubitsize(flag);
     int szv = ubitsize(value);
 
-    tuple result = null();
+    tuple res = null();
     builder cur = begin_cell();
-    int f? = true;
-    do {
-        slice v = s.preload_tail(sz);
-        if (v.preload_uint(sz) == flag) {
-            if (cur.builder_bits() + szv > 1023) {
-                result = cons(cur, result);
-                cur = begin_cell();
+
+    (int x, int w) = s~load_tail(256);
+    while (w >= sz) {
+        int i = 0;
+        int last = 0;
+        ;;~dump([x, w, w - sz, sz]);
+        int e = min(127, w - sz);
+        while (i <= e) {
+            ;;~dump([x, w, i, i + sz]);
+            int y = substr(x, w, i, i + sz);
+            ;;~dump(y);
+            if (y == flag) {
+                ;;~strdump("Found!");
+                ;;~dump([last, i, substr(x, w, last, i)]);
+                ;;~dump([(substr(x, w, last, i) << szv) + value, (i - last) + szv]);
+                (res, cur) = write(res, cur, (substr(x, w, last, i) << szv) + value, (i - last) + szv);
+                i += sz;
+                last = i;
+            } else {
+                i += 1;
             }
-            cur~store_uint(value, szv);
-            s~load_tail(sz - 1);
-        } else {
-            if (cur.builder_bits() + 1 > 1023) {
-                result = cons(cur, result);
-                cur = begin_cell();
-            }
-            cur~store_uint(v.preload_uint(1), 1);
         }
-        
-        s~load_tail(1);
-    } until (s.slice_empty?());
 
-    slice v = s.preload_tail(sz);
-    if (cur.builder_bits() + v.slice_bits() > 1023) {
-        result = cons(cur, result);
-        cur = begin_cell();
-    }
-    cur = cur.store_slice(v);
-    result = cons(cur, result);
-
-    builder res = begin_cell();
-
-    while (~ is_null(result)) {
-        builder t = result~list_next();
-        res = begin_cell().store_builder(t).store_ref(res.end_cell());
+        if (last < i) {
+            (res, cur) = write(res, cur, substr(x, w, last, i), i - last);
+        }
+        (int x', int w') = s~load_tail(256 - i);
+        ;;~dump([i, x, w, x', w']);
+        x = (sfx(x, w - i) << w') + x';
+        w = (w - i) + w';
     }
 
-    return res.end_cell();
+    ;;~dump([x, w, sz]);
+    (res, cur) = write(res, cur, x, w);
+
+    while (~ null?(res)) {
+        cur = (res~list_next()).store_ref(cur.end_cell());
+    }
+
+    return cur.end_cell();
 }
 
 () recv_internal() {
