@@ -47,10 +47,7 @@ int ubitsize(int) asm "UBITSIZE";
 int pow2dec(int x) inline asm "DEC POW2 DUP DEC ADD";
 
 int pfx(int x, int l, int n) inline {
-    if (n == 0) {
-        return 0;
-    }
-    return (x & (((1 << n) - 1) << (l - n))) >> (l - n);
+    return x >> (l - n);
 }
 
 int sfx(int x, int n) inline {
