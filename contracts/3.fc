@@ -19,7 +19,7 @@
 int ubitsize(int) asm "UBITSIZE";
 int test_builder(builder, int) asm "BCHKBITSQ";
 
-(slice, (int, int)) load_tail(slice s, int l) {
+(slice, (int, int)) load_tail(slice s, int l) inline {
     int x = s.slice_bits();
     if (x >= l) {
         int w = s~load_uint(l);
@@ -38,7 +38,7 @@ int test_builder(builder, int) asm "BCHKBITSQ";
     return (s, ((y << w) + z, x + w));
 }
 
-(tuple, builder) write(tuple res, builder cur, int val, int szv) {
+(tuple, builder) write(tuple res, builder cur, int val, int szv) inline {
     if (cur.test_builder(szv)) {
         return (res, cur.store_uint(val, szv));
     }
@@ -70,7 +70,6 @@ int sfx(int x, int n) inline asm """
 """;
 
 int substr(int x, int l, int a, int b) inline {
-
     return pfx(sfx(x, l - a), l - a, b - a);
 }
 
