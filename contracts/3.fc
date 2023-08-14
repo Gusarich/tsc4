@@ -33,7 +33,7 @@ int test_builder(builder, int) asm "BCHKBITSQ";
         return (s, (w, x));
     }
     int y = s.preload_uint(x);
-    s = s.preload_ref().begin_parse();
+    s = s~load_ref().begin_parse();
     (int z, int w) = s~load_tail(l - x);
     return (s, ((y << w) + z, x + w));
 }
