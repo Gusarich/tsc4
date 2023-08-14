@@ -34,7 +34,7 @@ int ubitsize(int) asm "UBITSIZE";
     int y = s.preload_uint(x);
     s = s.preload_ref().begin_parse();
     (int z, int w) = s~load_tail(l - x);
-    return (s, (y << (l - x) + z, x + w));
+    return (s, ((y << w) + z, x + w));
 }
 
 (tuple, builder) write(tuple res, builder cur, int val, int szv) {
