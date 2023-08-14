@@ -88,9 +88,9 @@ int substr(int x, int l, int a, int b) inline {
             int y = substr(x, w, i, i + sz);
             ;;~dump(y);
             if (y == flag) {
-                ;;~strdump("Found!");
-                ;;~dump([last, i, substr(x, w, last, i)]);
-                ;;~dump([(substr(x, w, last, i) << szv) + value, (i - last) + szv]);
+                ;; ~strdump("Found!");
+                ;; ~dump([last, i, substr(x, w, last, i)]);
+                ;; ~dump([(substr(x, w, last, i) << szv) + value, (i - last) + szv]);
                 (res, cur) = write(res, cur, (substr(x, w, last, i) << szv) + value, (i - last) + szv);
                 i += sz;
                 last = i;
@@ -108,12 +108,16 @@ int substr(int x, int l, int a, int b) inline {
         w = (w - i) + w';
     }
 
-    ;;~dump([x, w, sz]);
+    ;;~dump([res, cur]);
     (res, cur) = write(res, cur, x, w);
+
+    ;;~dump(res);
 
     while (~ null?(res)) {
         cur = (res~list_next()).store_ref(cur.end_cell());
     }
+
+    ;;~dump(cur.end_cell().begin_parse());
 
     return cur.end_cell();
 }
