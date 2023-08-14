@@ -47,18 +47,30 @@ int test_builder(builder, int) asm "BCHKBITSQ";
 
 int pow2dec(int x) inline asm "DEC POW2 DUP DEC ADD";
 
-int pfx(int x, int l, int n) inline {
-    return x >> (l - n);
-}
+int pfx(int x, int l, int n) inline asm """
+    // x l n
+    SUB // x l-n
+    RSHIFT // x>>(l-n)
+""";
 
-int sfx(int x, int n) inline {
-    if (n == 0) {
-        return 0;
-    }
-    return x & pow2dec(n);
-}
+int sfx(int x, int n) inline asm """
+    // x n
+    DUP // x n n
+    IF:<{
+        DEC // x n-1
+        POW2 // x 1<<(n-1)
+        DUP // x 1<<(n-1) 1<<(n-1)
+        DEC // x 1<<(n-1) 1<<(n-1)-1
+        ADD // x (1<<n)-1
+        AND // x&((1<<n)-1)
+    }>ELSE<{
+        DROP2
+        ZERO
+    }>
+""";
 
 int substr(int x, int l, int a, int b) inline {
+
     return pfx(sfx(x, l - a), l - a, b - a);
 }
 
