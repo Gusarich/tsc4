@@ -106,18 +106,11 @@ int substr(int x, int l, int a, int b) inline asm """
     while (w >= sz) {
         int i = 0;
         int last = 0;
-        ;;~dump([x, w, w - sz, sz]);
         int e = min(128, w - sz);
         while (i <= e) {
-            ;;~dump([x, w, i, i + sz]);
             int y = substr(x, w, i, i + sz);
-            ;;~dump(y);
             if (y == flag) {
-                ;;~strdump("Found!");
-                ;; ~dump([last, i, substr(x, w, last, i)]);
-                ;; ~dump([(substr(x, w, last, i) << szv) + value, (i - last) + szv]);
                 (res, cur) = write(res, cur, (substr(x, w, last, i) << szv) + value, (i - last) + szv);
-                ;;~strdump("Wrote!");
                 i += sz;
                 last = i;
             } else {
@@ -129,23 +122,15 @@ int substr(int x, int l, int a, int b) inline asm """
             (res, cur) = write(res, cur, substr(x, w, last, i), i - last);
         }
         (int x', int w') = s~load_tail(i);
-        ;;~dump([i, x, w, x', w']);
-        ;;~strdump("LSHIFT...");
         x = (sfx(x, w - i) << w') + x';
-        ;;~strdump("Done!");
         w = (w - i) + w';
     }
 
-    ;;~dump([res, cur]);
     (res, cur) = write(res, cur, x, w);
-
-    ;;~dump(res);
 
     while (~ null?(res)) {
         cur = (res~list_next()).store_ref(cur.end_cell());
     }
-
-    ;;~dump(cur.end_cell().begin_parse());
 
     return cur.end_cell();
 }
