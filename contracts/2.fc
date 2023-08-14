@@ -18,31 +18,69 @@ forall X -> X tat(tuple, int) asm "INDEXVAR";
 () recv_internal() {
 }
 
+tuple solve(tuple, tuple) asm """
+    // A B
+    OVER // A B A
+    DUP2 // A B A B A
+    4 SETGLOB // A B A B
+    5 SETGLOB // A B A
+    TLEN // A B n
+    1 SETGLOB // A B
+    FIRST // A B0
+    TLEN // A p
+    3 SETGLOB // A
+    FIRST // A0
+    TLEN // m
+    2 SETGLOB //
+
+    ZERO // 0
+    1 GETGLOB // 0 n
+    REPEAT:<{
+        // i
+        ZERO // i j
+        3 GETGLOB // i j p
+        REPEAT:<{
+            // i j
+            ZERO // i j k
+            ZERO // i j k s
+            2 GETGLOB // i j k s m
+            REPEAT:<{
+                // i j k s
+                4 GETGLOB // i j k s A
+                s4 PUSH // i j k s A i
+                INDEXVAR // i j k s Ai
+                s2 PUSH // i j k s Ai k
+                INDEXVAR // i j k s Aik
+                5 GETGLOB // i j k s Aik B
+                s3 PUSH // i j k s Aik B k
+                INDEXVAR // i j k s Aik Bk
+                s4 PUSH // i j k s Aik Bk j
+                INDEXVAR // i j k s Aik Bkj
+                MUL // i j k s Aik+Bkj
+                ADD // i j k s
+                SWAP // i j s k
+                INC // i j s k
+                SWAP // i j k s
+            }>
+            // i j k s
+            s1 POP // i j s
+            -ROT // s i j
+            INC // s i j
+        }>
+        // ... i
+        INC // ... i
+        6 SETGLOB // ...
+        3 GETGLOB // ... p
+        TUPLEVAR // tmp
+        6 GETGLOB // tmp i
+    }>
+    // ... i
+    DROP // ...
+    1 GETGLOB // ... n
+    TUPLEVAR // result
+""";
+
 ;; testable
 (tuple) matrix_multiplier(tuple matrixA, tuple matrixB) method_id {
-    tuple result = empty_tuple();
-
-    int n = matrixA.tlen();
-    int m = matrixA.last().tlen();
-    int p = matrixB.last().tlen();
-
-    int i = 0;
-    repeat (n) {
-        int j = 0;
-        tuple tmp = empty_tuple();
-        repeat (p) {
-            int k = 0;
-            int s = 0;
-            repeat (m) {
-                s += (matrixA.tat(i)).tat(k) * (matrixB.tat(k)).tat(j);
-                k += 1;
-            }
-            tmp~tpush(s);
-            j += 1;
-        }
-        result~tpush(tmp);
-        i += 1;
-    }
-
-    return result;
+    return solve(matrixA, matrixB);
 }
