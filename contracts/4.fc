@@ -36,9 +36,8 @@ builder encrypt(int, slice) asm """
     REPEAT:<{
         // ... b s
         8 LDU // ... b x s
-        SWAP // ... b s x
-        1 GETGLOB // ... b s x t
-        SWAP // ... b s t x
+        1 GETGLOB // ... b x s t
+        ROT // ... b s t x
         INDEXVAR // ... b s x
         ROT // ... s x b
         8 STU // ... s b
@@ -60,9 +59,8 @@ builder encrypt(int, slice) asm """
         REPEAT:<{
             // ... b s
             8 LDU // ... b x s
-            SWAP // ... b s x
-            1 GETGLOB // ... b s x t
-            SWAP // ... b s t x
+            1 GETGLOB // ... b x s t
+            ROT // ... b s t x
             INDEXVAR // ... b s x
             ROT // ... s x b
             8 STU // ... s b
