@@ -101,12 +101,17 @@ builder encrypt(int, slice) asm """
             // ... b s
             8 LDU // ... b x s
             SWAP // ... b s x
-            1 GETGLOB // ... b s x D
-            8 PUSHINT // ... b s x D 8
-            DICTUGET // ... b s xs ?
-            DROP // ... b s xs
-            8 LDU // ... b s x xs
-            DROP // ... b s x
+            DUP // ... b s x x
+            6 PUSHPOW2 // ... b s x x 64
+            AND // ... b s x ?
+            IF:<{
+                1 GETGLOB // ... b s x D
+                8 PUSHINT // ... b s x D 8
+                DICTUGET // ... b s xs ?
+                DROP // ... b s xs
+                8 LDU // ... b s x xs
+                DROP // ... b s x
+            }>
             ROT // ... s x b
             8 STU // ... s b
             SWAP // ... b s
@@ -128,12 +133,17 @@ builder encrypt(int, slice) asm """
                 // ... b s
                 8 LDU // ... b x s
                 SWAP // ... b s x
-                1 GETGLOB // ... b s x D
-                8 PUSHINT // ... b s x D 8
-                DICTUGET // ... b s xs ?
-                DROP // ... b s xs
-                8 LDU // ... b s x xs
-                DROP // ... b s x
+                DUP // ... b s x x
+                6 PUSHPOW2 // ... b s x x 64
+                AND // ... b s x ?
+                IF:<{
+                    1 GETGLOB // ... b s x D
+                    8 PUSHINT // ... b s x D 8
+                    DICTUGET // ... b s xs ?
+                    DROP // ... b s xs
+                    8 LDU // ... b s x xs
+                    DROP // ... b s x
+                }>
                 ROT // ... s x b
                 8 STU // ... s b
                 SWAP // ... b s
