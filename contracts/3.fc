@@ -19,7 +19,7 @@
 int ubitsize(int) asm "UBITSIZE";
 int test_builder(builder, int) asm "BCHKBITSQ";
 
-(slice, (int, int)) load_tail(slice s, int l) inline_ref {
+(slice, (int, int)) load_tail(slice s, int l) inline {
     int x = s.slice_bits();
     if (x >= l) {
         int w = s~load_uint(l);
@@ -38,7 +38,7 @@ int test_builder(builder, int) asm "BCHKBITSQ";
     return (s, ((y << w) + z, x + w));
 }
 
-(tuple, builder) write(tuple res, builder cur, int val, int szv) inline_ref {
+(tuple, builder) write(tuple res, builder cur, int val, int szv) inline {
     if (cur.test_builder(szv)) {
         return (res, cur.store_uint(val, szv));
     }
@@ -69,9 +69,28 @@ int sfx(int x, int n) inline asm """
     }>
 """;
 
-int substr(int x, int l, int a, int b) inline {
-    return pfx(sfx(x, l - a), l - a, b - a);
-}
+int substr(int x, int l, int a, int b) inline asm """
+    // pfx(sfx(x, l - a), l - a, b - a)
+    // x l a b
+
+    s2 s1 PUSH2 // x l a b l a
+    SUB // x l a b l-a
+    s1 s4 XCHG // b l a x l-a
+        DEC // x n-1
+        POW2 // x 1<<(n-1)
+        DUP // x 1<<(n-1) 1<<(n-1)
+        DEC // x 1<<(n-1) 1<<(n-1)-1
+        ADD // x (1<<n)-1
+        AND // x&((1<<n)-1)
+    // b l a sfx
+    s2 s1 XCPU // b sfx a l a
+    SUB // b sfx a l-a
+    s3 s3 XCHG2 // l-a sfx b a
+    SUB // l-a sfx b-a
+    s1 s2 XCHG // sfx l-a b-a
+        SUB // x l-n
+        RSHIFT // x>>(l-n)
+""";
 
 ;; testable
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
