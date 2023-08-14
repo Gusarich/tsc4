@@ -9,11 +9,6 @@
   After calculating the result matrix, the function should return final result (as tuple).
 -}
 
-forall X -> tuple unsafe_tuple(X) asm "NOP";
-int tlen(tuple) asm "TLEN";
-tuple last(tuple) asm "LAST";
-forall X -> X tat(tuple, int) asm "INDEXVAR";
-
 tuple solve(tuple, tuple) asm """
     // A B
     OVER // A B A
@@ -28,8 +23,6 @@ tuple solve(tuple, tuple) asm """
     FIRST // A0
     TLEN // m
     2 SETGLOB //
-
-    DUMPSTK
 
     ZERO // 0
     1 GETGLOB // 0 n
@@ -71,7 +64,6 @@ tuple solve(tuple, tuple) asm """
         3 GETGLOB // ... p
         TUPLEVAR // tmp
         6 GETGLOB // tmp i
-        DUMPSTK
     }>
     // ... i
     DROP // ...
@@ -85,15 +77,4 @@ tuple solve(tuple, tuple) asm """
 }
 
 () recv_internal() {
-    ;; tuple a = unsafe_tuple([
-    ;;     unsafe_tuple([1, 2, 3]),
-    ;;     unsafe_tuple([4, 5, 6])
-    ;; ]);
-    ;; tuple b = unsafe_tuple([
-    ;;     unsafe_tuple([7, 8]),
-    ;;     unsafe_tuple([9, 10]),
-    ;;     unsafe_tuple([11, 12])
-    ;; ]);
-
-    ;; ~dump(solve(a, b));
 }
