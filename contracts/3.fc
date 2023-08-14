@@ -88,10 +88,11 @@ int substr(int x, int l, int a, int b) inline {
             int y = substr(x, w, i, i + sz);
             ;;~dump(y);
             if (y == flag) {
-                ;; ~strdump("Found!");
+                ;;~strdump("Found!");
                 ;; ~dump([last, i, substr(x, w, last, i)]);
                 ;; ~dump([(substr(x, w, last, i) << szv) + value, (i - last) + szv]);
                 (res, cur) = write(res, cur, (substr(x, w, last, i) << szv) + value, (i - last) + szv);
+                ;;~strdump("Wrote!");
                 i += sz;
                 last = i;
             } else {
@@ -102,9 +103,11 @@ int substr(int x, int l, int a, int b) inline {
         if (last < i) {
             (res, cur) = write(res, cur, substr(x, w, last, i), i - last);
         }
-        (int x', int w') = s~load_tail(256 - i);
-        ;;~dump([i, x, w, x', w']);
+        (int x', int w') = s~load_tail(i);
+        ~dump([i, x, w, x', w']);
+        ;;~strdump("LSHIFT...");
         x = (sfx(x, w - i) << w') + x';
+        ;;~strdump("Done!");
         w = (w - i) + w';
     }
 
