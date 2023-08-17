@@ -43,7 +43,7 @@ int test_builder(builder, int) asm "BCHKBITSQ";
         slice xs = x.end_cell().begin_parse();
         int i = 0;
         int last = 0;
-        int e = min(128, w - sz);
+        int e = w - sz;
         while (i <= e) {
             int y = xs.skip_bits(i).preload_uint(sz);
             if (y == flag) {
