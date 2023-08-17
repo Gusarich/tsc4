@@ -15,9 +15,7 @@
 tuple solve(tuple, tuple) asm """
     }> }END>c drop <{
         // h t method_id
-        ISZERO // h t ?
-        IFRET // h t
-        // A B
+        IFNOTRET // A B
         OVER // A B A
         DUP2 // A B A B A
         4 SETGLOB // A B A B
