@@ -53,7 +53,7 @@ slice substr(slice, int, int) asm "SDSUBSTR";
                 ifnot (cur.test_builder(d + szv)) {
                     (res, cur) = (cons(cur, res), begin_cell());
                 }
-                cur = cur.store_slice(xs.skip_bits(last).preload_bits(d)).store_uint(value, szv);
+                cur = cur.store_slice(xs.substr(last, d)).store_uint(value, szv);
                 i += sz;
                 last = i;
             } else {
