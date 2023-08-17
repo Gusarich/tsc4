@@ -19,8 +19,7 @@
 tuple solve(int n, int k) asm """
     }> }END>c drop <{
         // h t method_id
-        ISZERO // h t ?
-        IFRET // h t
+        IFNOTRET // h t
         // n k
         DUP // n k k
         IFNOTJMP:<{
