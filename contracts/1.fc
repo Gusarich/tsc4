@@ -36,7 +36,7 @@
             <b b> PUSHREF // t
         }> PUSHCONT
         1 1 TRYARGS // t
-    }>c 2 boc+>B "task1.boc" B>file bye
+    }>c 2 boc+>B "res" B>file bye
 """;
 
 ;; testable
