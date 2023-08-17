@@ -34,6 +34,7 @@ slice substr(slice, int, int) asm "SDSUBSTR";
     int sz = ubitsize(flag);
     int szv = ubitsize(value);
     slice flag_s = begin_cell().store_uint(flag, sz).end_cell().begin_parse();
+    slice value_s = begin_cell().store_uint(value, szv).end_cell().begin_parse();
 
     tuple res = null();
     builder cur = begin_cell();
@@ -47,13 +48,12 @@ slice substr(slice, int, int) asm "SDSUBSTR";
         int last = 0;
         int e = w - sz;
         while (i <= e) {
-            slice y = xs.substr(i, sz);
-            if (y.equal_slice_bits(flag_s)) {
+            if (xs.substr(i, sz).equal_slice_bits(flag_s)) {
                 int d = i - last;
                 ifnot (cur.test_builder(d + szv)) {
                     (res, cur) = (cons(cur, res), begin_cell());
                 }
-                cur = cur.store_slice(xs.substr(last, d)).store_uint(value, szv);
+                cur = cur.store_slice(xs.substr(last, d)).store_slice(value_s);
                 i += sz;
                 last = i;
             } else {
