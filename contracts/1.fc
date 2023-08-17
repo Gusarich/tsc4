@@ -12,7 +12,8 @@
 (cell) solve(int h, cell t) asm """
     }> }END>c drop <{
         // h t method_id
-        DROP // h t
+        92939 EQINT // h t ?
+        IFNOTRET // h t
         SWAP // t h
         1 SETGLOB // t
         DUP // t t
