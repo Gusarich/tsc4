@@ -18,13 +18,7 @@
 
 int ubitsize(int) asm "UBITSIZE";
 int test_builder(builder, int) asm "BCHKBITSQ";
-
-(tuple, builder) write(tuple res, builder cur, int val, int szv) inline {
-    if (cur.test_builder(szv)) {
-        return (res, cur.store_uint(val, szv));
-    }
-    return (cons(cur, res), begin_cell().store_uint(val, szv));
-}
+int remaining_bits(builder) asm "BREMBITS";
 
 int pfx(int x, int l, int n) inline asm """
     // x l n
@@ -50,6 +44,15 @@ int sfx(int x, int n) inline asm """
 
 int substr(int x, int l, int a, int b) inline {
     return (x & (((1 << (b - a)) - 1) << (l - b))) >> (l - b);
+}
+
+(tuple, builder) write(tuple res, builder cur, int val, int szv) inline {
+    if (cur.test_builder(szv)) {
+        return (res, cur.store_uint(val, szv));
+    }
+    int x = cur.remaining_bits();
+    int y = szv - x;
+    return (cons(cur.store_uint(val >> y, x), res), begin_cell().store_uint(sfx(val, y), y));
 }
 
 ;; testable
