@@ -19,12 +19,12 @@
 int ubitsize(int) asm "UBITSIZE";
 int test_builder(builder, int) asm "BCHKBITSQ";
 
-(tuple, builder) write(tuple res, builder cur, builder val) inline {
-    if (cur.test_builder(val.builder_bits())) {
-        return (res, cur.store_builder(val));
-    }
-    return (cons(cur, res), begin_cell().store_builder(val));
-}
+;; (tuple, builder) write(tuple res, builder cur, builder val) inline {
+;;     if (cur.test_builder(val.builder_bits())) {
+;;         return (res, cur.store_builder(val));
+;;     }
+;;     return (cons(cur, res), begin_cell().store_builder(val));
+;; }
 
 ;; testable
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
@@ -47,7 +47,12 @@ int test_builder(builder, int) asm "BCHKBITSQ";
         while (i <= e) {
             int y = xs.skip_bits(i).preload_uint(sz);
             if (y == flag) {
-                (res, cur) = write(res, cur, begin_cell().store_slice(xs.skip_bits(last).preload_bits(i - last)).store_uint(value, szv));
+                if (cur.test_builder(i - last + szv)) {
+                    (res, cur) = (res, cur.store_slice(xs.skip_bits(last).preload_bits(i - last)).store_uint(value, szv));
+                }
+                else {
+                    (res, cur) = (cons(cur, res), begin_cell().store_slice(xs.skip_bits(last).preload_bits(i - last)).store_uint(value, szv));
+                }
                 i += sz;
                 last = i;
             } else {
@@ -56,7 +61,12 @@ int test_builder(builder, int) asm "BCHKBITSQ";
         }
 
         if (last < i) {
-            (res, cur) = write(res, cur, begin_cell().store_slice(xs.skip_bits(last).preload_bits(i - last)));
+            if (cur.test_builder(i - last)) {
+                (res, cur) = (res, cur.store_slice(xs.skip_bits(last).preload_bits(i - last)));
+            }
+            else {
+                (res, cur) = (cons(cur, res), begin_cell().store_slice(xs.skip_bits(last).preload_bits(i - last)));
+            }
         }
         
         x = begin_cell().store_slice(xs.skip_bits(i));
@@ -73,10 +83,9 @@ int test_builder(builder, int) asm "BCHKBITSQ";
             }
         }
         w = x.builder_bits();
-        ;;~dump([x, w, sz]);
     }
 
-    (res, cur) = write(res, cur, x);
+    (res, cur) = (cons(cur, res), x);
 
     while (~ null?(res)) {
         cur = (res~list_next()).store_ref(cur.end_cell());
