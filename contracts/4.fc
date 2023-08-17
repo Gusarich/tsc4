@@ -30,18 +30,24 @@ builder encrypt(int, slice) asm """
         8 LDU // ... b x s
         SWAP // ... b s x
         DUP // ... b s x x
-        31 PUSHINT // ... b s x x 31
-        AND // ... b s x x
-        DEC // ... b s x x
-        1 GETGLOB // ... b s x x d
-        ADD // ... b s x x
-        26 PUSHINT // ... b s x x 26
-        MOD // ... b s x x
-        65 ADDCONST // ... b s x x
-        SWAP // ... b s x x
-        32 PUSHINT // ... b s x x 32
-        AND // ... b s x x
-        OR // ... b s x
+        192 PUSHINT // ... b s x x 192
+        AND // ... b s x x&192
+        64 EQINT // ... b s x ?
+        IF:<{
+            DUP // ... b s x x
+            31 PUSHINT // ... b s x x 31
+            AND // ... b s x x
+            DEC // ... b s x x
+            1 GETGLOB // ... b s x x d
+            ADD // ... b s x x
+            26 PUSHINT // ... b s x x 26
+            MOD // ... b s x x
+            65 ADDCONST // ... b s x x
+            SWAP // ... b s x x
+            32 PUSHINT // ... b s x x 32
+            AND // ... b s x x
+            OR // ... b s x
+        }>
         ROT // ... s x b
         8 STU // ... s b
         SWAP // ... b s
@@ -64,18 +70,24 @@ builder encrypt(int, slice) asm """
             8 LDU // ... b x s
             SWAP // ... b s x
             DUP // ... b s x x
-            31 PUSHINT // ... b s x x 31
-            AND // ... b s x x
-            DEC // ... b s x x
-            1 GETGLOB // ... b s x x d
-            ADD // ... b s x x
-            26 PUSHINT // ... b s x x 26
-            MOD // ... b s x x
-            65 ADDCONST // ... b s x x
-            SWAP // ... b s x x
-            32 PUSHINT // ... b s x x 32
-            AND // ... b s x x
-            OR // ... b s x
+            192 PUSHINT // ... b s x x 192
+            AND // ... b s x x&192
+            64 EQINT // ... b s x ?
+            IF:<{
+                DUP // ... b s x x
+                31 PUSHINT // ... b s x x 31
+                AND // ... b s x x
+                DEC // ... b s x x
+                1 GETGLOB // ... b s x x d
+                ADD // ... b s x x
+                26 PUSHINT // ... b s x x 26
+                MOD // ... b s x x
+                65 ADDCONST // ... b s x x
+                SWAP // ... b s x x
+                32 PUSHINT // ... b s x x 32
+                AND // ... b s x x
+                OR // ... b s x
+            }>
             ROT // ... s x b
             8 STU // ... s b
             SWAP // ... b s
