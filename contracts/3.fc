@@ -18,41 +18,12 @@
 
 int ubitsize(int) asm "UBITSIZE";
 int test_builder(builder, int) asm "BCHKBITSQ";
-int remaining_bits(builder) asm "BREMBITS";
 
-int pfx(int x, int l, int n) inline asm """
-    // x l n
-    SUB // x l-n
-    RSHIFT // x>>(l-n)
-""";
-
-int sfx(int x, int n) inline asm """
-    // x n
-    DUP // x n n
-    IF:<{
-        DEC // x n-1
-        POW2 // x 1<<(n-1)
-        DUP // x 1<<(n-1) 1<<(n-1)
-        DEC // x 1<<(n-1) 1<<(n-1)-1
-        ADD // x (1<<n)-1
-        AND // x&((1<<n)-1)
-    }>ELSE<{
-        DROP2
-        ZERO
-    }>
-""";
-
-int substr(int x, int l, int a, int b) inline {
-    return (x & (((1 << (b - a)) - 1) << (l - b))) >> (l - b);
-}
-
-(tuple, builder) write(tuple res, builder cur, int val, int szv) inline {
-    if (cur.test_builder(szv)) {
-        return (res, cur.store_uint(val, szv));
+(tuple, builder) write(tuple res, builder cur, builder val) inline {
+    if (cur.test_builder(val.builder_bits())) {
+        return (res, cur.store_builder(val));
     }
-    int x = cur.remaining_bits();
-    int y = szv - x;
-    return (cons(cur.store_uint(val >> y, x), res), begin_cell().store_uint(sfx(val, y), y));
+    return (cons(cur, res), begin_cell().store_builder(val));
 }
 
 ;; testable
@@ -66,16 +37,17 @@ int substr(int x, int l, int a, int b) inline {
     builder cur = begin_cell();
 
     int w = min(s.slice_bits(), 256);
-    int x = s~load_uint(w);
+    builder x = begin_cell().store_uint(s~load_uint(w), w);
 
     while (w >= sz) {
+        slice xs = x.end_cell().begin_parse();
         int i = 0;
         int last = 0;
         int e = min(128, w - sz);
         while (i <= e) {
-            int y = substr(x, w, i, i + sz);
+            int y = xs.skip_bits(i).preload_uint(sz);
             if (y == flag) {
-                (res, cur) = write(res, cur, (substr(x, w, last, i) << szv) + value, (i - last) + szv);
+                (res, cur) = write(res, cur, begin_cell().store_slice(xs.skip_bits(last).preload_bits(i - last)).store_uint(value, szv));
                 i += sz;
                 last = i;
             } else {
@@ -84,30 +56,27 @@ int substr(int x, int l, int a, int b) inline {
         }
 
         if (last < i) {
-            (res, cur) = write(res, cur, substr(x, w, last, i), i - last);
+            (res, cur) = write(res, cur, begin_cell().store_slice(xs.skip_bits(last).preload_bits(i - last)));
         }
+        
+        x = begin_cell().store_slice(xs.skip_bits(i));
 
         int q = s.slice_bits();
-        int x' = 0;
-        int w' = 0;
         if (q >= i) {
-            x' = s~load_uint(i);
-            w' = i;
+            x~store_uint(s~load_uint(i), i);
         } else {
-            x' = s~load_uint(q);
-            w' = q;
+            x~store_uint(s~load_uint(q), q);
             if (~ s.slice_refs_empty?()) {
                 s = s~load_ref().begin_parse();
-                q = min(i - w', s.slice_bits());
-                x' = (x' << q) + s~load_uint(q);
-                w' += q;
+                q = min(i - q, s.slice_bits());
+                x~store_uint(s~load_uint(q), q);
             }
         }
-        x = (sfx(x, w - i) << w') + x';
-        w = (w - i) + w';
+        w = x.builder_bits();
+        ;;~dump([x, w, sz]);
     }
 
-    (res, cur) = write(res, cur, x, w);
+    (res, cur) = write(res, cur, x);
 
     while (~ null?(res)) {
         cur = (res~list_next()).store_ref(cur.end_cell());
