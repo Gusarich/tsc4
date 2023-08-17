@@ -19,25 +19,6 @@
 int ubitsize(int) asm "UBITSIZE";
 int test_builder(builder, int) asm "BCHKBITSQ";
 
-(slice, (int, int)) load_tail(slice s, int l) inline {
-    int x = s.slice_bits();
-    if (x >= l) {
-        int w = s~load_uint(l);
-        return (s, (w, l));
-    }
-    if (s.slice_empty?()) {
-        return (s, (0, 0));
-    }
-    if (s.slice_refs_empty?()) {
-        int w = s~load_uint(x);
-        return (s, (w, x));
-    }
-    int y = s.preload_uint(x);
-    s = s.preload_ref().begin_parse();
-    (int z, int w) = s~load_tail(l - x);
-    return (s, ((y << w) + z, x + w));
-}
-
 (tuple, builder) write(tuple res, builder cur, int val, int szv) inline {
     if (cur.test_builder(szv)) {
         return (res, cur.store_uint(val, szv));
@@ -67,29 +48,6 @@ int sfx(int x, int n) inline asm """
     }>
 """;
 
-;; int substr(int x, int l, int a, int b) inline asm """
-;;     // (x & (((1 << (b - a)) - 1) << (l - b))) >> (l - b)
-;;     // x l a b
-
-;;     s2 s1 PUSH2 // x l a b l a
-;;     SUB // x l a b l-a
-;;     s1 s4 XCHG // b l a x l-a
-;;         DEC // x n-1
-;;         POW2 // x 1<<(n-1)
-;;         DUP // x 1<<(n-1) 1<<(n-1)
-;;         DEC // x 1<<(n-1) 1<<(n-1)-1
-;;         ADD // x (1<<n)-1
-;;         AND // x&((1<<n)-1)
-;;     // b l a sfx
-;;     s2 s1 XCPU // b sfx a l a
-;;     SUB // b sfx a l-a
-;;     s3 s3 XCHG2 // l-a sfx b a
-;;     SUB // l-a sfx b-a
-;;     s1 s2 XCHG // sfx l-a b-a
-;;         SUB // x l-n
-;;         RSHIFT // x>>(l-n)
-;; """;
-
 int substr(int x, int l, int a, int b) inline {
     return (x & (((1 << (b - a)) - 1) << (l - b))) >> (l - b);
 }
@@ -104,7 +62,9 @@ int substr(int x, int l, int a, int b) inline {
     tuple res = null();
     builder cur = begin_cell();
 
-    (int x, int w) = s~load_tail(256);
+    int w = min(s.slice_bits(), 256);
+    int x = s~load_uint(w);
+
     while (w >= sz) {
         int i = 0;
         int last = 0;
@@ -123,7 +83,23 @@ int substr(int x, int l, int a, int b) inline {
         if (last < i) {
             (res, cur) = write(res, cur, substr(x, w, last, i), i - last);
         }
-        (int x', int w') = s~load_tail(i);
+
+        int q = s.slice_bits();
+        int x' = 0;
+        int w' = 0;
+        if (q >= i) {
+            x' = s~load_uint(i);
+            w' = i;
+        } else {
+            x' = s~load_uint(q);
+            w' = q;
+            if (~ s.slice_refs_empty?()) {
+                s = s~load_ref().begin_parse();
+                q = min(i - w', s.slice_bits());
+                x' = (x' << q) + s~load_uint(q);
+                w' += q;
+            }
+        }
         x = (sfx(x, w - i) << w') + x';
         w = (w - i) + w';
     }
