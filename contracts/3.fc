@@ -49,10 +49,11 @@ slice substr(slice, int, int) asm "SDSUBSTR";
         while (i <= e) {
             slice y = xs.substr(i, sz);
             if (y.equal_slice_bits(flag_s)) {
-                ifnot (cur.test_builder(i - last + szv)) {
+                int d = i - last;
+                ifnot (cur.test_builder(d + szv)) {
                     (res, cur) = (cons(cur, res), begin_cell());
                 }
-                cur = cur.store_slice(xs.skip_bits(last).preload_bits(i - last)).store_uint(value, szv);
+                cur = cur.store_slice(xs.skip_bits(last).preload_bits(d)).store_uint(value, szv);
                 i += sz;
                 last = i;
             } else {
