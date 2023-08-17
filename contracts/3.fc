@@ -74,8 +74,7 @@ int test_builder(builder, int) asm "BCHKBITSQ";
             x~store_uint(s~load_uint(q), q);
             if (~ s.slice_refs_empty?()) {
                 s = s~load_ref().begin_parse();
-                q = min(i - q, s.slice_bits());
-                x~store_uint(s~load_uint(q), q);
+                x = x.store_slice(s~load_bits(min(i - q, s.slice_bits())));
             }
         }
         w = x.builder_bits();
