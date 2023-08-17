@@ -18,6 +18,7 @@
 
 int ubitsize(int) asm "UBITSIZE";
 int test_builder(builder, int) asm "BCHKBITSQ";
+slice substr(slice, int, int) asm "SDSUBSTR";
 
 ;; (tuple, builder) write(tuple res, builder cur, builder val) inline {
 ;;     if (cur.test_builder(val.builder_bits())) {
@@ -32,6 +33,7 @@ int test_builder(builder, int) asm "BCHKBITSQ";
 
     int sz = ubitsize(flag);
     int szv = ubitsize(value);
+    slice flag_s = begin_cell().store_uint(flag, sz).end_cell().begin_parse();
 
     tuple res = null();
     builder cur = begin_cell();
@@ -45,8 +47,8 @@ int test_builder(builder, int) asm "BCHKBITSQ";
         int last = 0;
         int e = w - sz;
         while (i <= e) {
-            int y = xs.skip_bits(i).preload_uint(sz);
-            if (y == flag) {
+            slice y = xs.substr(i, sz);
+            if (y.equal_slice_bits(flag_s)) {
                 ifnot (cur.test_builder(i - last + szv)) {
                     (res, cur) = (cons(cur, res), begin_cell());
                 }
