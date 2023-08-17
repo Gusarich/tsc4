@@ -47,12 +47,10 @@ int test_builder(builder, int) asm "BCHKBITSQ";
         while (i <= e) {
             int y = xs.skip_bits(i).preload_uint(sz);
             if (y == flag) {
-                if (cur.test_builder(i - last + szv)) {
-                    (res, cur) = (res, cur.store_slice(xs.skip_bits(last).preload_bits(i - last)).store_uint(value, szv));
+                ifnot (cur.test_builder(i - last + szv)) {
+                    (res, cur) = (cons(cur, res), begin_cell());
                 }
-                else {
-                    (res, cur) = (cons(cur, res), begin_cell().store_slice(xs.skip_bits(last).preload_bits(i - last)).store_uint(value, szv));
-                }
+                cur = cur.store_slice(xs.skip_bits(last).preload_bits(i - last)).store_uint(value, szv);
                 i += sz;
                 last = i;
             } else {
@@ -61,12 +59,10 @@ int test_builder(builder, int) asm "BCHKBITSQ";
         }
 
         if (last < i) {
-            if (cur.test_builder(i - last)) {
-                (res, cur) = (res, cur.store_slice(xs.skip_bits(last).preload_bits(i - last)));
+            ifnot (cur.test_builder(i - last)) {
+                (res, cur) = (cons(cur, res), begin_cell());
             }
-            else {
-                (res, cur) = (cons(cur, res), begin_cell().store_slice(xs.skip_bits(last).preload_bits(i - last)));
-            }
+            cur = cur.store_slice(xs.skip_bits(last).preload_bits(i - last));
         }
         
         x = begin_cell().store_slice(xs.skip_bits(i));
