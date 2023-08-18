@@ -62,9 +62,9 @@ slice substr(slice, int, int) asm "SDSUBSTR";
 
         int q = s.slice_bits();
         if (q >= i) {
-            x~store_uint(s~load_uint(i), i);
+            x = x.store_slice(s~load_bits(i));
         } else {
-            x~store_uint(s~load_uint(q), q);
+            x = x.store_slice(s~load_bits(q));
             ifnot (s.slice_refs_empty?()) {
                 s = s~load_ref().begin_parse();
                 x = x.store_slice(s~load_bits(min(i - q, s.slice_bits())));
