@@ -20,12 +20,8 @@ int ubitsize(int) asm "UBITSIZE";
 int test_builder(builder, int) asm "BCHKBITSQ";
 slice substr(slice, int, int) asm "SDSUBSTR";
 
-global int test;
-
 ;; testable
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
-    test = 200;
-
     slice s = linked_list.begin_parse();
 
     int sz = ubitsize(flag);
@@ -38,6 +34,7 @@ global int test;
 
     int w = min(256, s.slice_bits());
     builder x = begin_cell().store_uint(s~load_uint(w), w);
+    int cnt = 0;
 
     while (w >= sz) {
         slice xs = x.end_cell().begin_parse();
@@ -46,8 +43,9 @@ global int test;
         int e = w - sz;
         while (i <= e) {
             if (equal_slice_bits(xs.substr(i, sz), flag_s)) {
-                ifnot (cur.test_builder(test)) {
+                ifnot (cur.test_builder(256)) {
                     (res, cur) = (cons(cur, res), begin_cell());
+                    cnt += 1;
                 }
                 cur = cur.store_slice(xs.substr(last, i - last)).store_slice(value_s);
                 i += sz;
@@ -59,6 +57,7 @@ global int test;
 
         ifnot (cur.test_builder(i - last)) {
             (res, cur) = (cons(cur, res), begin_cell());
+            cnt += 1;
         }
         cur = cur.store_slice(xs.skip_bits(last).preload_bits(i - last));
         
@@ -79,7 +78,7 @@ global int test;
 
     (res, cur) = (cons(cur, res), x);
 
-    while (~ null?(res)) {
+    repeat (cnt + 1) {
         cur = (res~list_next()).store_ref(cur.end_cell());
     }
 
