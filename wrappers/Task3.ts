@@ -1,3 +1,4 @@
+import { GetMethodResult } from '@ton-community/sandbox';
 import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from 'ton-core';
 
 export type Task3Config = {};
@@ -25,5 +26,21 @@ export class Task3 implements Contract {
             sendMode: SendMode.PAY_GAS_SEPARATELY,
             body: beginCell().endCell(),
         });
+    }
+
+    async getReplace(provider: ContractProvider, flag: bigint, value: bigint, string: Cell): Promise<Cell> {
+        try {
+            const result = await provider.get('find_and_replace', [
+                { type: 'int', value: flag },
+                { type: 'int', value: value },
+                { type: 'cell', cell: string },
+            ]);
+            //console.log(result.gasUsed);
+            return result.stack.readCell();
+        } catch (e) {
+            console.log((e as GetMethodResult).exitCode);
+            console.log((e as GetMethodResult).debugLogs);
+        }
+        return Cell.EMPTY;
     }
 }
