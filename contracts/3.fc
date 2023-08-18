@@ -56,7 +56,7 @@ slice substr(slice, int, int) asm "SDSUBSTR";
         ifnot (cur.test_builder(256)) {
             (res, cur) = (cons(cur, res), begin_cell());
         }
-        cur = cur.store_slice(xs.skip_bits(last).preload_bits(i - last));
+        cur = cur.store_slice(xs.substr(last, i - last));
         
         x = begin_cell().store_slice(xs.skip_bits(i));
 
