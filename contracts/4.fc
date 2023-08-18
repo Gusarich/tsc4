@@ -13,15 +13,23 @@ global tuple tup;
 
 builder encrypt_fast(slice s) {
     builder bld = begin_cell();
-    repeat (s.slice_bits() / 32) {
+    repeat (s.slice_bits() / 64) {
         int a = s~load_uint(8);
         int b = s~load_uint(8);
         int c = s~load_uint(8);
         int d = s~load_uint(8);
+        int e = s~load_uint(8);
+        int f = s~load_uint(8);
+        int g = s~load_uint(8);
+        int h = s~load_uint(8);
         bld~store_uint(tup.at(a), 8);
         bld~store_uint(tup.at(b), 8);
         bld~store_uint(tup.at(c), 8);
         bld~store_uint(tup.at(d), 8);
+        bld~store_uint(tup.at(e), 8);
+        bld~store_uint(tup.at(f), 8);
+        bld~store_uint(tup.at(g), 8);
+        bld~store_uint(tup.at(h), 8);
     }
     repeat (s.slice_bits() / 8) {
         int a = s~load_uint(8);
