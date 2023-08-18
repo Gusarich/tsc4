@@ -25,7 +25,6 @@ slice substr(slice, int, int) asm "SDSUBSTR";
     slice s = linked_list.begin_parse();
 
     int sz = ubitsize(flag);
-    int sz-1 = sz - 1;
     int szv = ubitsize(value);
     slice flag_s = begin_cell().store_uint(flag, sz).end_cell().begin_parse();
     slice value_s = begin_cell().store_uint(value, szv).end_cell().begin_parse();
@@ -43,15 +42,15 @@ slice substr(slice, int, int) asm "SDSUBSTR";
         int e = w - sz;
         while (i <= e) {
             if (equal_slice_bits(xs.substr(i, sz), flag_s)) {
-                int d = i - last;
                 ifnot (cur.test_builder(256)) {
                     (res, cur) = (cons(cur, res), begin_cell());
                 }
-                cur = cur.store_slice(xs.substr(last, d)).store_slice(value_s);
-                i += sz-1;
-                last = i + 1;
+                cur = cur.store_slice(xs.substr(last, i - last)).store_slice(value_s);
+                i += sz;
+                last = i;
+            } else {
+                i += 1;
             }
-            i += 1;
         }
 
         if (last < i) {
