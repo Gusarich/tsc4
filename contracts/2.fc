@@ -32,8 +32,9 @@ forall X -> X tat(tuple, int) asm "INDEXVAR";
         repeat (p) {
             int k = 0;
             int s = 0;
+            tuple Ai = matrixA.at(i);
             repeat (m) {
-                s += (matrixA.at(i)).at(k) * (matrixB.at(k)).at(j);
+                s += Ai.at(k) * (matrixB.at(k)).at(j);
                 k += 1;
             }
             tmp~tpush(s);
