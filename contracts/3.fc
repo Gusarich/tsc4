@@ -20,13 +20,6 @@ int ubitsize(int) asm "UBITSIZE";
 int test_builder(builder, int) asm "BCHKBITSQ";
 slice substr(slice, int, int) asm "SDSUBSTR";
 
-;; (tuple, builder) write(tuple res, builder cur, builder val) inline {
-;;     if (cur.test_builder(val.builder_bits())) {
-;;         return (res, cur.store_builder(val));
-;;     }
-;;     return (cons(cur, res), begin_cell().store_builder(val));
-;; }
-
 ;; testable
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
     slice s = linked_list.begin_parse();
@@ -39,7 +32,7 @@ slice substr(slice, int, int) asm "SDSUBSTR";
     tuple res = null();
     builder cur = begin_cell();
 
-    int w = min(s.slice_bits(), 256);
+    int w = s.slice_bits();
     builder x = begin_cell().store_uint(s~load_uint(w), w);
 
     while (w >= sz) {
