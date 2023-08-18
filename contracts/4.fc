@@ -63,9 +63,14 @@ builder encrypt(int, slice) asm """
         REPEAT:<{
             // ... b s
             8 LDU // ... b x s
-            1 GETGLOB // ... b x s t
-            ROT // ... b s t x
-            INDEXVAR // ... b s x
+            SWAP // ... b s x
+            DUP // ... b s x x
+            122 LEQINT // ... b s x ?
+            IF:<{
+                1 GETGLOB // ... b s x t
+                SWAP // ... b s t x
+                INDEXVAR // ... b s x
+            }>
             ROT // ... s x b
             8 STU // ... s b
             SWAP // ... b s
