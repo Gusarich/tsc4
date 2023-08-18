@@ -7,84 +7,26 @@
 -}
 
 () recv_internal() {
-
 }
 
 builder encrypt(int, slice) asm """
     // d s
     SWAP // s d
-    26 PUSHINT // s d 26
-    MOD // s d
-    
-    // fift
-    dictnew // D
-    0 // D 0
-    {
-        tuck // i D i
-        <b 
-            // i D i b
-            0 // i D i b 0
-            {
-                tuck // i D i j b j
-                8 // i D i j b j 8
-                u, // i D i j b
-                swap // i D i b j
-                1 + // i D i b j+1
-            } 65 times // i D i b 65
-            {
-                tuck // i D i j b j
-                65 - // i D i j b j-65
-                3 pick // i D i j b j-65 i
-                + // i D i j b j-65+i
-                26 mod // i D i j b j-65
-                65 + // i D i j b j
-                8 // i D i j b j 8
-                u, // i D i j b
-                swap // i D i b j
-                1 + // i D i b j+1
-            } 26 times // i D i b 91
-            {
-                tuck // i D i j b j
-                8 // i D i j b j 8
-                u, // i D i j b
-                swap // i D i b j
-                1 + // i D i b j+1
-            } 6 times // i D i b 97
-            {
-                tuck // i D i j b j
-                97 - // i D i j b j-97
-                3 pick // i D i j b j-97 i
-                + // i D i j b j-97+i
-                26 mod // i D i j b j-97
-                97 + // i D i j b j
-                8 // i D i j b j 8
-                u, // i D i j b
-                swap // i D i b j
-                1 + // i D i b j+1
-            } 26 times // i D i b 123
-            drop // i D i b
-        b> <s // i D i v
-        2 exch // i v i D
-        5 // i v i D 5
-        udict! // i D ?
-        drop // i D
-        swap // D i
-        1 + // D i+1
-    } 26 times // D 26
-    drop // D
-    // fift
-    
-    PUSHREF // s d D
-    5 PUSHINT // s d D 5
-    DICTUGET // s t ?
-    DROP // s t
-    1 SETGLOB // s
+    0 PUSHINT 1 PUSHINT 2 PUSHINT 3 PUSHINT 4 PUSHINT 5 PUSHINT 6 PUSHINT 7 PUSHINT 8 PUSHINT 9 PUSHINT 10 PUSHINT 11 PUSHINT 12 PUSHINT 13 PUSHINT 14 PUSHINT 15 PUSHINT 16 PUSHINT 17 PUSHINT 18 PUSHINT 19 PUSHINT 20 PUSHINT 21 PUSHINT 22 PUSHINT 23 PUSHINT 24 PUSHINT 25 PUSHINT 26 PUSHINT 27 PUSHINT 28 PUSHINT 29 PUSHINT 30 PUSHINT 31 PUSHINT 32 PUSHINT 33 PUSHINT 34 PUSHINT 35 PUSHINT 36 PUSHINT 37 PUSHINT 38 PUSHINT 39 PUSHINT 40 PUSHINT 41 PUSHINT 42 PUSHINT 43 PUSHINT 44 PUSHINT 45 PUSHINT 46 PUSHINT 47 PUSHINT 48 PUSHINT 49 PUSHINT 50 PUSHINT 51 PUSHINT 52 PUSHINT 53 PUSHINT 54 PUSHINT 55 PUSHINT 56 PUSHINT 57 PUSHINT 58 PUSHINT 59 PUSHINT 60 PUSHINT 61 PUSHINT 62 PUSHINT 63 PUSHINT 64 PUSHINT
+    65 s() PUSH DUP 0 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 1 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 2 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 3 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 4 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 5 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 6 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 7 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 8 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 9 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 10 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 11 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 12 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 13 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 14 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 15 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 16 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 17 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 18 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 19 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 20 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 21 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 22 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 23 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 24 ADDCONST 26 PUSHINT MOD 65 ADDCONST SWAP DUP 25 ADDCONST 26 PUSHINT MOD 65 ADDCONST NIP
+    91 PUSHINT 92 PUSHINT 93 PUSHINT 94 PUSHINT 95 PUSHINT 96 PUSHINT
+    97 s() PUSH DUP 0 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 1 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 2 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 3 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 4 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 5 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 6 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 7 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 8 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 9 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 10 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 11 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 12 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 13 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 14 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 15 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 16 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 17 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 18 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 19 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 20 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 21 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 22 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 23 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 24 ADDCONST 26 PUSHINT MOD 97 ADDCONST SWAP DUP 25 ADDCONST 26 PUSHINT MOD 97 ADDCONST NIP
+    123 PUSHINT // s d t 123
+    TUPLEVAR // s d t
+    1 SETGLOB // s d
+    DROP // s
     DUP // s s
     SDEPTH // s sd
     REPEAT:<{
         LDREFRTOS // ... s
     }>
     // s0 s1 ... sn
+
     NEWC // ... b
     SWAP // ... b s
     DUP // ... b s s
@@ -97,19 +39,12 @@ builder encrypt(int, slice) asm """
         DUP // ... b s x x
         122 LEQINT // ... b s x ?
         IF:<{
-            // ... b s x
             1 GETGLOB // ... b s x t
             SWAP // ... b s t x
-            8 MULCONST // ... b s t 8x
-            8 PUSHINT // ... b s t 8x 8
-            SDSUBSTR // ... b s t'
-            ROT // ... s t' b
-            STSLICE // ... s b
-        }>ELSE<{
-            // ... b s x
-            ROT // ... s x b
-            8 STU // ... s b
+            INDEXVAR // ... b s x
         }>
+        ROT // ... s x b
+        8 STU // ... s b
         SWAP // ... b s
     }>
     // ... b s
@@ -128,23 +63,11 @@ builder encrypt(int, slice) asm """
         REPEAT:<{
             // ... b s
             8 LDU // ... b x s
-            SWAP // ... b s x
-            DUP // ... b s x x
-            122 LEQINT // ... b s x ?
-            IF:<{
-                // ... b s x
-                1 GETGLOB // ... b s x t
-                SWAP // ... b s t x
-                8 MULCONST // ... b s t 8x
-                8 PUSHINT // ... b s t 8x 8
-                SDSUBSTR // ... b s t'
-                ROT // ... s t' b
-                STSLICE // ... s b
-            }>ELSE<{
-                // ... b s x
-                ROT // ... s x b
-                8 STU // ... s b
-            }>
+            1 GETGLOB // ... b x s t
+            ROT // ... b s t x
+            INDEXVAR // ... b s x
+            ROT // ... s x b
+            8 STU // ... s b
             SWAP // ... b s
         }>
         // ... b s
