@@ -9,121 +9,37 @@
 () recv_internal() {
 }
 
-builder encrypt_fast(slice) asm """
-    DUP // s s
-    SDEPTH // s sd
-    REPEAT:<{
-        LDREFRTOS // ... s
-    }>
-    // s0 s1 ... sn
+global tuple tup;
 
-    NEWC // ... b
-    SWAP // ... b s
-    DUP // ... b s s
-    SBITS // ... b s sb
-    3 RSHIFT# // ... b s sb/8
-    REPEAT:<{
-        // ... b s
-        8 LDU // ... b x s
-        1 GETGLOB // ... b x s t
-        ROT // ... b s t x
-        INDEXVAR // ... b s x
-        ROT // ... s x b
-        8 STU // ... s b
-        SWAP // ... b s
-    }>
-    // ... b s
-    DROP // ... b
-    DEPTH // ... b n+1
-    DEC // ... b n
-    REPEAT:<{
-        // ... b
-        ENDC // ... c
-        NEWC // ... c b
-        STREF // ... b
-        SWAP // ... b s
-        DUP // ... b s s
-        SBITS // ... b s sb
-        3 RSHIFT# // ... b s sb/8
-        REPEAT:<{
-            // ... b s
-            8 LDU // ... b x s
-            1 GETGLOB // ... b x s t
-            ROT // ... b s t x
-            INDEXVAR // ... b s x
-            ROT // ... s x b
-            8 STU // ... s b
-            SWAP // ... b s
-        }>
-        // ... b s
-        DROP // ... b
-    }>
-    // b
-""";
+builder encrypt_fast(slice s) {
+    builder b = begin_cell();
+    repeat (s.slice_bits() / 8) {
+        int a = s~load_uint(8);
+        b~store_uint(tup.at(a), 8);
+    }
+    if (s.slice_empty?()) {
+        return b;
+    }
+    return b.store_ref(encrypt_fast(s~load_ref().begin_parse()).end_cell());
+}
 
-builder encrypt_slow(slice) asm """
-    DUP // s s
-    SDEPTH // s sd
-    REPEAT:<{
-        LDREFRTOS // ... s
-    }>
-    // s0 s1 ... sn
+builder encrypt_slow(slice s) {
+    builder b = begin_cell();
+    repeat (s.slice_bits() / 8) {
+        int a = s~load_uint(8);
+        if (a <= 122) {
+            b~store_uint(tup.at(a), 8);
+        } else {
+            b~store_uint(a, 8);
+        }
+    }
+    if (s.slice_empty?()) {
+        return b;
+    }
+    return b.store_ref(encrypt_slow(s~load_ref().begin_parse()).end_cell());
+}
 
-    NEWC // ... b
-    SWAP // ... b s
-    DUP // ... b s s
-    SBITS // ... b s sb
-    3 RSHIFT# // ... b s sb/8
-    REPEAT:<{
-        // ... b s
-        8 LDU // ... b x s
-        OVER // ... b x s x
-        122 LEQINT // ... b x s ?
-        IF:<{
-            1 GETGLOB // ... b x s t
-            ROT // ... b s t x
-            INDEXVAR // ... b s x
-            SWAP // ... b x s
-        }>
-        s2 XCHG0 // ... s x b
-        8 STU // ... s b
-        SWAP // ... b s
-    }>
-    // ... b s
-    DROP // ... b
-    DEPTH // ... b n+1
-    DEC // ... b n
-    REPEAT:<{
-        // ... b
-        ENDC // ... c
-        NEWC // ... c b
-        STREF // ... b
-        SWAP // ... b s
-        DUP // ... b s s
-        SBITS // ... b s sb
-        3 RSHIFT# // ... b s sb/8
-        REPEAT:<{
-            // ... b s
-            8 LDU // ... b x s
-            OVER // ... b x s x
-            122 LEQINT // ... b x s ?
-            IF:<{
-                1 GETGLOB // ... b x s t
-                ROT // ... b s t x
-                INDEXVAR // ... b s x
-                SWAP // ... b x s
-            }>
-            s2 XCHG0 // ... s x b
-            8 STU // ... s b
-            SWAP // ... b s
-        }>
-        // ... b s
-        DROP // ... b
-    }>
-    // b
-""";
-
-() generate_tuple(int) impure asm """
+(tuple) generate_tuple(int) impure asm """
     dictnew // D
     0 // D 0
     {
@@ -187,11 +103,10 @@ builder encrypt_slow(slice) asm """
     DROP
     123 PUSHINT
     TUPLEVAR
-    1 SETGLOB
 """;
 
 builder encrypt(int shift, slice text) {
-    generate_tuple(shift);
+    tup = generate_tuple(shift);
     try {
         return encrypt_fast(text);
     } catch (e) {
