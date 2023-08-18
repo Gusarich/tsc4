@@ -41,19 +41,19 @@ slice substr(slice, int, int) asm "SDSUBSTR";
         int last = 0;
         int e = w - sz;
         while (i <= e) {
-            ifnot (equal_slice_bits(xs.substr(i, sz), flag_s)) {
-                i += 1;
-            } else {
+            if (equal_slice_bits(xs.substr(i, sz), flag_s)) {
                 ifnot (cur.test_builder(256)) {
                     (res, cur) = (cons(cur, res), begin_cell());
                 }
                 cur = cur.store_slice(xs.substr(last, i - last)).store_slice(value_s);
                 i += sz;
                 last = i;
+            } else {
+                i += 1;
             }
         }
 
-        ifnot (cur.test_builder(i - last)) {
+        ifnot (cur.test_builder(256)) {
             (res, cur) = (cons(cur, res), begin_cell());
         }
         cur = cur.store_slice(xs.skip_bits(last).preload_bits(i - last));
