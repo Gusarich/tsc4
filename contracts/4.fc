@@ -29,9 +29,10 @@ builder encrypt(int shift, slice text) {
         repeat (text.slice_bits() / 8) {
             int c = text~load_uint(8);
             try {
-                c = t.at(c);
-            } catch (e) { }
-            cur~store_uint(c, 8);
+                cur~store_uint(t.at(c), 8);
+            } catch (e) {
+                cur~store_uint(c, 8);
+            }
         }
         
         if (text.slice_refs_empty?()) {
