@@ -11,11 +11,18 @@
 
 forall X -> tuple unsafe_tuple(X) asm "NOP";
 int tlen(tuple) asm "TLEN";
+forall X -> X tpop(tuple) asm "TPOP";
 tuple last(tuple) asm "LAST";
 forall X -> X tat(tuple, int) asm "INDEXVAR";
-
-() recv_internal() {
-}
+tuple reverse(tuple, int) asm """
+    // t s
+    UNTUPLEVAR // t0 t1 ... ts
+    DEPTH // t0 t1 ... ts s
+    ZERO // t0 t1 ... ts s 0
+    REVX // ts ... t1 t0
+    DEPTH // ts ... t1 t0 s
+    TUPLEVAR // t
+""";
 
 ;; testable
 (tuple) matrix_multiplier(tuple matrixA, tuple matrixB) method_id {
@@ -25,24 +32,32 @@ forall X -> X tat(tuple, int) asm "INDEXVAR";
     int m = matrixA.last().tlen();
     int p = matrixB.last().tlen();
 
-    int i = 0;
     repeat (n) {
         int j = 0;
         tuple tmp = empty_tuple();
+        tuple Ai = matrixA~tpop();
         repeat (p) {
-            int k = 0;
             int s = 0;
-            tuple Ai = matrixA.at(i);
+            tuple A = Ai;
+            tuple B = matrixB;
             repeat (m) {
-                s += Ai.at(k) * (matrixB.at(k)).at(j);
-                k += 1;
+                s += A~tpop() * B~tpop().at(j);
             }
             tmp~tpush(s);
             j += 1;
         }
         result~tpush(tmp);
-        i += 1;
     }
 
-    return result;
+    return reverse(result, n);
+}
+
+() recv_internal() {
+    ;; ~dump(matrix_multiplier(
+    ;;     unsafe_tuple([unsafe_tuple([1, 2, 3]),
+    ;;                   unsafe_tuple([4, 5, 6])]),
+    ;;     unsafe_tuple([unsafe_tuple([7, 8]),
+    ;;                   unsafe_tuple([9, 10]),
+    ;;                   unsafe_tuple([11, 12])])
+    ;; ));
 }
