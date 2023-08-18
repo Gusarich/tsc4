@@ -41,7 +41,7 @@ slice substr(slice, int, int) asm "SDSUBSTR";
         int last = 0;
         int e = w - sz;
         while (i <= e) {
-            if (equal_slice_bits(flag_s, xs.substr(i, sz))) {
+            if (xs.substr(i, sz).equal_slice_bits(flag_s)) {
                 int d = i - last;
                 ifnot (cur.test_builder(d + szv)) {
                     (res, cur) = (cons(cur, res), begin_cell());
