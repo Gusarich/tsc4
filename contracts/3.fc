@@ -20,8 +20,12 @@ int ubitsize(int) asm "UBITSIZE";
 int test_builder(builder, int) asm "BCHKBITSQ";
 slice substr(slice, int, int) asm "SDSUBSTR";
 
+;;global int test;
+
 ;; testable
 (cell) find_and_replace(int flag, int value, cell linked_list) method_id {
+    ;;test = 200;
+
     slice s = linked_list.begin_parse();
 
     int sz = ubitsize(flag);
@@ -53,12 +57,10 @@ slice substr(slice, int, int) asm "SDSUBSTR";
             }
         }
 
-        if (last < i) {
-            ifnot (cur.test_builder(i - last)) {
-                (res, cur) = (cons(cur, res), begin_cell());
-            }
-            cur = cur.store_slice(xs.skip_bits(last).preload_bits(i - last));
+        ifnot (cur.test_builder(i - last)) {
+            (res, cur) = (cons(cur, res), begin_cell());
         }
+        cur = cur.store_slice(xs.skip_bits(last).preload_bits(i - last));
         
         x = begin_cell().store_slice(xs.skip_bits(i));
 
