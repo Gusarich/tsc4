@@ -32,7 +32,7 @@ slice substr(slice, int, int) asm "SDSUBSTR";
     tuple res = null();
     builder cur = begin_cell();
 
-    int w = s.slice_bits();
+    int w = min(256, s.slice_bits());
     builder x = begin_cell().store_uint(s~load_uint(w), w);
 
     while (w >= sz) {
@@ -41,7 +41,7 @@ slice substr(slice, int, int) asm "SDSUBSTR";
         int last = 0;
         int e = w - sz;
         while (i <= e) {
-            if (xs.substr(i, sz).equal_slice_bits(flag_s)) {
+            if (equal_slice_bits(flag_s, xs.substr(i, sz))) {
                 int d = i - last;
                 ifnot (cur.test_builder(d + szv)) {
                     (res, cur) = (cons(cur, res), begin_cell());
