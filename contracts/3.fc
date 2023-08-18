@@ -43,7 +43,7 @@ slice substr(slice, int, int) asm "SDSUBSTR";
         while (i <= e) {
             if (equal_slice_bits(xs.substr(i, sz), flag_s)) {
                 int d = i - last;
-                ifnot (cur.test_builder(200)) {
+                ifnot (cur.test_builder(128)) {
                     (res, cur) = (cons(cur, res), begin_cell());
                 }
                 cur = cur.store_slice(xs.substr(last, d)).store_slice(value_s);
