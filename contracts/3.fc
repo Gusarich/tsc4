@@ -34,7 +34,6 @@ slice substr(slice, int, int) asm "SDSUBSTR";
 
     int w = min(256, s.slice_bits());
     builder x = begin_cell().store_uint(s~load_uint(w), w);
-    int cnt = 0;
 
     while (w >= sz) {
         slice xs = x.end_cell().begin_parse();
@@ -43,11 +42,11 @@ slice substr(slice, int, int) asm "SDSUBSTR";
         int e = w - sz;
         while (i <= e) {
             if (equal_slice_bits(xs.substr(i, sz), flag_s)) {
-                ifnot (cur.test_builder(256)) {
-                    (res, cur) = (cons(cur, res), begin_cell());
-                    cnt += 1;
+                try {
+                    cur = cur.store_slice(xs.substr(last, i - last)).store_slice(value_s);
+                } catch (e) {
+                    (res, cur) = (cons(cur, res), begin_cell().store_slice(xs.substr(last, i - last)).store_slice(value_s));
                 }
-                cur = cur.store_slice(xs.substr(last, i - last)).store_slice(value_s);
                 i += sz;
                 last = i;
             } else {
@@ -55,11 +54,11 @@ slice substr(slice, int, int) asm "SDSUBSTR";
             }
         }
 
-        ifnot (cur.test_builder(i - last)) {
-            (res, cur) = (cons(cur, res), begin_cell());
-            cnt += 1;
+        try {
+            cur = cur.store_slice(xs.skip_bits(last).preload_bits(i - last));
+        } catch (e) {
+            (res, cur) = (cons(cur, res), begin_cell().store_slice(xs.skip_bits(last).preload_bits(i - last)));
         }
-        cur = cur.store_slice(xs.skip_bits(last).preload_bits(i - last));
         
         x = begin_cell().store_slice(xs.skip_bits(i));
 
@@ -78,7 +77,7 @@ slice substr(slice, int, int) asm "SDSUBSTR";
 
     (res, cur) = (cons(cur, res), x);
 
-    repeat (cnt + 1) {
+    while (~ null?(res)) {
         cur = (res~list_next()).store_ref(cur.end_cell());
     }
 
